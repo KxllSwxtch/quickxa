@@ -898,25 +898,6 @@ def get_rub_to_krw_rate():
         return None
 
 
-def get_currency_rates():
-    global usd_rate, usd_to_krw_rate, usd_to_rub_rate
-
-    print_message("ПОЛУЧАЕМ КУРСЫ ВАЛЮТ")
-
-    # Получаем курс USD → KRW
-    get_usd_to_krw_rate()
-
-    # Получаем курс USD → RUB
-    get_usd_to_rub_rate()
-
-    rates_text = (
-        f"USD → KRW: <b>{usd_to_krw_rate:.2f} ₩</b>\n"
-        f"USD → RUB: <b>{usd_to_rub_rate:.2f} ₽</b>"
-    )
-
-    return rates_text
-
-
 # Функция для получения курсов валют с API
 def get_usd_to_krw_rate():
     global usd_to_krw_rate
@@ -941,24 +922,40 @@ def get_usd_to_krw_rate():
 def get_usd_to_rub_rate():
     global usd_to_rub_rate
 
-    url = "https://mosca.moscow/api/v1/rate/"
-    headers = {
-        "Access-Token": "JI_piVMlX9TsvIRKmduIbZOWzLo-v2zXozNfuxxXj4_MpsUKd_7aQS16fExzA7MVFCVVoAAmrb_-aMuu_UIbJA"
-    }
+    url = "https://www.cbr-xml-daily.ru/daily_json.js"
 
     try:
-        response = requests.get(url, headers=headers)
+        response = requests.get(url)
         response.raise_for_status()  # Проверяем успешность запроса
         data = response.json()
 
-        # Получаем курс USD → RUB
-        usd_to_rub = data["buy"]
+        # Получаем курс USD → RUB из ЦБ РФ
+        usd_to_rub = data["Valute"]["USD"]["Value"]
         usd_to_rub_rate = usd_to_rub
 
         print(f"Курс USD → RUB: {usd_to_rub_rate}")
     except requests.RequestException as e:
         print(f"Ошибка при получении курса USD → RUB: {e}")
         usd_to_rub_rate = None
+
+
+def get_currency_rates():
+    global usd_rate, usd_to_krw_rate, usd_to_rub_rate
+
+    print_message("ПОЛУЧАЕМ КУРСЫ ВАЛЮТ")
+
+    # Получаем курс USD → KRW
+    get_usd_to_krw_rate()
+
+    # Получаем курс USD → RUB
+    get_usd_to_rub_rate()
+
+    rates_text = (
+        f"USD → KRW: <b>{usd_to_krw_rate:.2f} ₩</b>\n"
+        f"USD → RUB: <b>{usd_to_rub_rate:.2f} ₽</b>"
+    )
+
+    return rates_text
 
 
 # Обработчик команды /cbr
@@ -2284,7 +2281,8 @@ def handle_message(message):
     # Проверка на другие команды
     elif user_message == "Написать менеджеру":
         managers_list = [
-            {"name": "Родика", "whatsapp": "https://wa.me/821079346603"},
+            {"name": "Менеджер 1", "whatsapp": "https://wa.me/821076261999"},
+            {"name": "Менеджер 2", "whatsapp": "https://wa.me/821079346603"},
         ]
 
         # Формируем сообщение со списком менеджеров

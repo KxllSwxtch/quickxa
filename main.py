@@ -2591,14 +2591,22 @@ def process_car_price(message):
 
     # Формируем сообщение с расчетом стоимости
     if is_manager:
+        age_display = (
+            "До 3 лет"
+            if age_group == "0-3"
+            else (
+                "От 3 до 5 лет"
+                if age_group == "3-5"
+                else (
+                    "От 5 до 7 лет"
+                    if age_group == "5-7"
+                    else "От 7 лет" if age_group == "7-0" else age_group
+                )
+            )
+        )
+
         result_message = (
-            f"📅 Возраст: {
-                'До 3 лет' if age_group == '0-3' else
-                'От 3 до 5 лет' if age_group == '3-5' else
-                'От 5 до 7 лет' if age_group == '5-7' else
-                'От 7 лет' if age_group == '7-0' else
-                age_group
-                }\n"
+            f"📅 Возраст: {age_display}\n"
             f"🔧 Объём двигателя: {engine_volume} cc\n\n"
             f"💰 СТОИМОСТЬ:\n"
             f"▪️ Цена авто в Корее: ₩{format_number(car_price_krw)}\n"
@@ -2619,14 +2627,22 @@ def process_car_price(message):
             f"• Доставка до Москвы: от 180 000.00 ₽\n\n"
         )
     else:
+        age_display = (
+            "До 3 лет"
+            if age_group == "0-3"
+            else (
+                "От 3 до 5 лет"
+                if age_group == "3-5"
+                else (
+                    "От 5 до 7 лет"
+                    if age_group == "5-7"
+                    else "От 7 лет" if age_group == "7-0" else age_group
+                )
+            )
+        )
+
         result_message = (
-            f"📅 Возраст: {
-                'До 3 лет' if age_group == '0-3' else
-                'От 3 до 5 лет' if age_group == '3-5' else
-                'От 5 до 7 лет' if age_group == '5-7' else
-                'От 7 лет' if age_group == '7-0' else
-                age_group
-                }\n"
+            f"📅 Возраст: {age_display}\n"
             f"🔧 Объём двигателя: {engine_volume} cc\n\n"
             f"💰 СТОИМОСТЬ:\n"
             f"▪️ Цена авто в Корее: ₩{format_number(car_price_krw)}\n\n"

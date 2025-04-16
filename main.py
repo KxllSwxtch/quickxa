@@ -76,6 +76,21 @@ usd_to_krw_rate = 0
 usd_to_rub_rate = 0
 
 user_orders = {}
+user_requests = {}  # Словарь для хранения информации о заявках клиентов
+
+# Шаги заполнения заявки
+REQUEST_STEPS = {
+    "car_type": "Какой тип авто вы ищете? (седан, кроссовер, внедорожник и т.д.)",
+    "year": "Какой год выпуска вас интересует?",
+    "mileage": "Какой максимальный пробег вас устроит?",
+    "drive": "Какой привод вы предпочитаете? (передний, задний, полный)",
+    "preferences": "Укажите ваши предпочтения (цвет, комплектация и т.д.):",
+    "budget": "Какой у вас бюджет? (в рублях):",
+    "region": "В каком регионе России вы находитесь?",
+}
+
+# Шаг, на котором находится пользователь
+user_request_step = {}
 
 
 ################## КОД ДЛЯ СТАТУСОВ
@@ -84,10 +99,8 @@ pending_orders = {}
 user_contacts = {}
 user_names = {}
 
-MANAGERS = [728438182]
-FREE_ACCESS_USERS = {
-    728438182,  # Дима,
-}
+MANAGERS = [728438182, 5481346081, 455033439]
+FREE_ACCESS_USERS = {728438182, 5481346081, 455033439}  # Дима,
 
 ORDER_STATUSES = {
     "1": "🚗 Авто выкуплен (на базе)",
@@ -97,6 +110,368 @@ ORDER_STATUSES = {
     "5": "📦 Погрузка до МСК",
     "6": "🚛 Доставляется клиенту",
 }
+
+
+@bot.callback_query_handler(
+    func=lambda call: call.data == "request_details" or call.data == "car_request"
+)
+def start_car_request(call):
+    # Если это запрос на получение подробностей после расчета авто
+    if call.data == "request_details":
+        handle_car_request_after_calculation(call)
+        return
+
+    # Иначе обрабатываем стандартную заявку
+    chat_id = call.message.chat.id
+
+    # Очищаем данные предыдущей заявки, если она была
+    user_requests[chat_id] = {}
+    user_request_step[chat_id] = "car_type"  # Устанавливаем первый шаг
+
+    # Создаем клавиатуру с кнопкой отмены
+    keyboard = types.ReplyKeyboardMarkup(resize_keyboard=True)
+    keyboard.add("Отмена")
+
+    # Приветственное сообщение
+    bot.send_message(
+        chat_id,
+        "Заполните мини-анкету, и мы подберем для вас лучшие варианты. "
+        "Ответьте на несколько вопросов:",
+        reply_markup=keyboard,
+    )
+
+    # Задаем первый вопрос
+    msg = bot.send_message(chat_id, REQUEST_STEPS["car_type"])
+    bot.register_next_step_handler(msg, process_car_request_step)
+
+
+def handle_car_request_after_calculation(call):
+    """Обработка заявки на автомобиль после расчета стоимости"""
+    chat_id = call.message.chat.id
+
+    # Сохраняем информацию о заявке
+    if chat_id not in user_requests:
+        user_requests[chat_id] = {}
+
+    # Сохраняем ссылку на автомобиль и другие данные
+    user_requests[chat_id]["car_link"] = car_data.get("link", "Ссылка не указана")
+    user_requests[chat_id]["car_name"] = car_data.get("name", "Модель не указана")
+    user_requests[chat_id]["car_price"] = car_data.get("car_price", "Цена не указана")
+
+    # Запрашиваем ФИО
+    msg = bot.send_message(chat_id, "Пожалуйста, введите ваше ФИО:")
+    bot.register_next_step_handler(msg, process_fullname_for_car_request)
+
+
+def process_fullname_for_car_request(message):
+    """Обработка ФИО для заявки на автомобиль"""
+    chat_id = message.chat.id
+    fullname = message.text
+
+    # Проверяем, не отменил ли пользователь заполнение заявки
+    if fullname in ["Отмена", "Главное меню", "отмена", "главное меню"]:
+        if chat_id in user_requests:
+            del user_requests[chat_id]
+        bot.send_message(
+            chat_id,
+            "Заявка отменена.",
+            reply_markup=main_menu(),
+        )
+        return
+
+    # Сохраняем ФИО
+    user_requests[chat_id]["fullname"] = fullname
+
+    # Запрашиваем номер телефона
+    keyboard = types.ReplyKeyboardMarkup(row_width=1, resize_keyboard=True)
+    button_phone = types.KeyboardButton(
+        text="Поделиться номером телефона", request_contact=True
+    )
+    keyboard.add(button_phone)
+    keyboard.add("Отмена")
+
+    msg = bot.send_message(
+        chat_id,
+        "Пожалуйста, поделитесь своим номером телефона:",
+        reply_markup=keyboard,
+    )
+    bot.register_next_step_handler(msg, process_phone_for_car_request)
+
+
+def process_phone_for_car_request(message):
+    """Обработка номера телефона для заявки на автомобиль"""
+    chat_id = message.chat.id
+
+    # Проверяем, не отменил ли пользователь заполнение заявки
+    if message.text and message.text in [
+        "Отмена",
+        "Главное меню",
+        "отмена",
+        "главное меню",
+    ]:
+        if chat_id in user_requests:
+            del user_requests[chat_id]
+        bot.send_message(
+            chat_id,
+            "Заявка отменена.",
+            reply_markup=main_menu(),
+        )
+        return
+
+    if message.contact is not None:
+        # Получаем номер телефона
+        phone_number = message.contact.phone_number
+        fullname = user_requests[chat_id].get("fullname", "Не указано")
+        car_link = user_requests[chat_id].get("car_link", "Ссылка не указана")
+        car_name = user_requests[chat_id].get("car_name", "Модель не указана")
+        car_price = user_requests[chat_id].get("car_price", "Цена не указана")
+        username = message.from_user.username or "Нет username"
+
+        # Формируем сообщение для менеджеров
+        manager_msg = (
+            f"🚨 <b>НОВАЯ ЗАЯВКА НА АВТОМОБИЛЬ</b> 🚨\n\n"
+            f"👤 Клиент: {fullname}\n"
+            f"📱 Телефон: {phone_number}\n"
+            f"👤 Telegram: @{username}\n\n"
+            f"🚗 Автомобиль: {car_name}\n"
+            f"💰 Стоимость: ₩{format_number(car_price)}\n"
+            f"🔗 <a href='{car_link}'>Ссылка на автомобиль</a>\n\n"
+            f"⚡ Клиент интересуется данным автомобилем и ожидает вашего звонка!"
+        )
+
+        # Отправляем уведомление всем менеджерам
+        for manager_id in MANAGERS:
+            try:
+                bot.send_message(manager_id, manager_msg, parse_mode="HTML")
+            except Exception as e:
+                print(f"Ошибка отправки уведомления менеджеру {manager_id}: {e}")
+
+        # Отправляем подтверждение пользователю
+        keyboard = types.ReplyKeyboardMarkup(resize_keyboard=True)
+        keyboard.add("Главное меню")
+
+        bot.send_message(
+            chat_id,
+            "Спасибо! Ваша заявка на автомобиль отправлена. Наш менеджер свяжется с вами в ближайшее время.",
+            reply_markup=keyboard,
+        )
+
+        # Очищаем данные заявки
+        if chat_id in user_requests:
+            del user_requests[chat_id]
+    else:
+        # Если пользователь не отправил контакт, просим еще раз
+        keyboard = types.ReplyKeyboardMarkup(row_width=1, resize_keyboard=True)
+        button_phone = types.KeyboardButton(
+            text="Поделиться номером телефона", request_contact=True
+        )
+        keyboard.add(button_phone)
+        keyboard.add("Отмена")
+
+        msg = bot.send_message(
+            chat_id,
+            "Для отправки заявки необходимо поделиться номером телефона.",
+            reply_markup=keyboard,
+        )
+        bot.register_next_step_handler(msg, process_phone_for_car_request)
+
+
+def process_car_request_step(message):
+    """Обработка ответов на вопросы заявки"""
+    chat_id = message.chat.id
+    text = message.text
+
+    # Проверяем, не хочет ли пользователь отменить заполнение заявки
+    if text in ["Отмена", "Главное меню", "отмена", "главное меню"]:
+        # Очищаем данные заявки
+        if chat_id in user_requests:
+            del user_requests[chat_id]
+        if chat_id in user_request_step:
+            del user_request_step[chat_id]
+
+        # Возвращаем в главное меню
+        bot.send_message(
+            chat_id,
+            "Заполнение заявки отменено.",
+            reply_markup=main_menu(),
+        )
+        return
+
+    # Если пользователь отправил что-то кроме текста, просим повторить
+    if not text:
+        msg = bot.send_message(chat_id, "Пожалуйста, введите текстовый ответ.")
+        bot.register_next_step_handler(msg, process_car_request_step)
+        return
+
+    # Определяем текущий шаг
+    current_step = user_request_step.get(chat_id)
+    if not current_step or chat_id not in user_requests:
+        # Если что-то пошло не так, начинаем заново
+        start_new_request(message)
+        return
+
+    # Сохраняем ответ пользователя
+    user_requests[chat_id][current_step] = text
+
+    # Определяем следующий шаг
+    steps = list(REQUEST_STEPS.keys())
+    current_index = steps.index(current_step)
+
+    if current_index < len(steps) - 1:
+        # Если есть следующий шаг, переходим к нему
+        next_step = steps[current_index + 1]
+        user_request_step[chat_id] = next_step
+
+        # Создаем клавиатуру с кнопкой отмены
+        keyboard = types.ReplyKeyboardMarkup(resize_keyboard=True)
+        keyboard.add("Отмена")
+
+        msg = bot.send_message(chat_id, REQUEST_STEPS[next_step], reply_markup=keyboard)
+        bot.register_next_step_handler(msg, process_car_request_step)
+    else:
+        # Если это был последний шаг, переходим к запросу телефона
+        finish_car_request(message)
+
+
+def finish_car_request(message):
+    """Завершение процесса заполнения заявки, запрос телефона"""
+    chat_id = message.chat.id
+
+    # Проверка, не отменил ли пользователь заполнение заявки
+    if message.text in ["Отмена", "Главное меню", "отмена", "главное меню"]:
+        # Очищаем данные заявки
+        if chat_id in user_requests:
+            del user_requests[chat_id]
+        if chat_id in user_request_step:
+            del user_request_step[chat_id]
+
+        # Возвращаем в главное меню
+        bot.send_message(
+            chat_id,
+            "Заполнение заявки отменено.",
+            reply_markup=main_menu(),
+        )
+        return
+
+    # Создаем кнопку для отправки номера телефона
+    keyboard = types.ReplyKeyboardMarkup(row_width=1, resize_keyboard=True)
+    button_phone = types.KeyboardButton(
+        text="Отправить номер телефона", request_contact=True
+    )
+    keyboard.add(button_phone)
+    keyboard.add("Отмена")  # Добавляем кнопку отмены
+
+    msg = bot.send_message(
+        chat_id,
+        "Для завершения заявки, пожалуйста, поделитесь своим номером телефона:",
+        reply_markup=keyboard,
+    )
+    bot.register_next_step_handler(msg, process_contact_for_request)
+
+
+def process_contact_for_request(message):
+    """Обработка полученного контакта и отправка заявки менеджерам"""
+    chat_id = message.chat.id
+
+    # Проверка, не отменил ли пользователь заполнение заявки
+    if message.text in ["Отмена", "Главное меню", "отмена", "главное меню"]:
+        # Очищаем данные заявки
+        if chat_id in user_requests:
+            del user_requests[chat_id]
+        if chat_id in user_request_step:
+            del user_request_step[chat_id]
+
+        # Возвращаем в главное меню
+        bot.send_message(
+            chat_id,
+            "Заполнение заявки отменено.",
+            reply_markup=main_menu(),
+        )
+        return
+
+    if message.contact is not None:
+        # Получаем номер телефона
+        phone_number = message.contact.phone_number
+        user_name = message.from_user.first_name
+        user_username = message.from_user.username or "Нет username"
+
+        # Добавляем телефон к заявке
+        user_requests[chat_id]["phone"] = phone_number
+
+        # Формируем сообщение для менеджеров
+        request_data = user_requests[chat_id]
+        manager_msg = (
+            f"📝 <b>НОВАЯ ЗАЯВКА НА ПОДБОР АВТО</b>\n\n"
+            f"👤 От: {user_name} (@{user_username})\n"
+            f"📱 Телефон: {phone_number}\n\n"
+            f"🚗 Тип авто: {request_data.get('car_type', 'Не указано')}\n"
+            f"📅 Год выпуска: {request_data.get('year', 'Не указано')}\n"
+            f"🛣 Макс. пробег: {request_data.get('mileage', 'Не указано')} км\n"
+            f"⚙️ Привод: {request_data.get('drive', 'Не указано')}\n"
+            f"🎨 Предпочтения: {request_data.get('preferences', 'Не указано')}\n"
+            f"💰 Бюджет: {request_data.get('budget', 'Не указано')} ₽\n"
+            f"📍 Регион: {request_data.get('region', 'Не указано')}\n"
+        )
+
+        # Отправляем уведомление всем менеджерам
+        for manager_id in MANAGERS:
+            try:
+                bot.send_message(manager_id, manager_msg, parse_mode="HTML")
+            except Exception as e:
+                print(f"Ошибка отправки уведомления менеджеру {manager_id}: {e}")
+
+        # Отправляем подтверждение пользователю
+        keyboard = types.ReplyKeyboardMarkup(resize_keyboard=True)
+        keyboard.add("Главное меню")
+
+        bot.send_message(
+            chat_id,
+            "Спасибо! Мы получили вашу заявку и свяжемся с вами в ближайшее время.\n"
+            "Менеджер: @HYT_TRADING_KR",
+            reply_markup=keyboard,
+        )
+
+        # Очищаем данные заявки
+        if chat_id in user_requests:
+            del user_requests[chat_id]
+        if chat_id in user_request_step:
+            del user_request_step[chat_id]
+    else:
+        # Если пользователь не отправил контакт, просим еще раз
+        keyboard = types.ReplyKeyboardMarkup(row_width=1, resize_keyboard=True)
+        button_phone = types.KeyboardButton(
+            text="Отправить номер телефона", request_contact=True
+        )
+        keyboard.add(button_phone)
+        keyboard.add("Отмена")  # Добавляем кнопку отмены
+
+        msg = bot.send_message(
+            chat_id,
+            "Для завершения заявки необходимо отправить контакт. Пожалуйста, нажмите на кнопку 'Отправить номер телефона'.",
+            reply_markup=keyboard,
+        )
+        bot.register_next_step_handler(msg, process_contact_for_request)
+
+
+def start_new_request(message):
+    """Запуск нового процесса заполнения заявки"""
+    chat_id = message.chat.id
+    user_requests[chat_id] = {}
+    user_request_step[chat_id] = "car_type"
+
+    # Создаем клавиатуру с кнопкой отмены
+    keyboard = types.ReplyKeyboardMarkup(resize_keyboard=True)
+    keyboard.add("Отмена")
+
+    bot.send_message(
+        chat_id,
+        "Заполните мини-анкету, и мы подберем для вас лучшие варианты. "
+        "Ответьте на несколько вопросов:",
+        reply_markup=keyboard,
+    )
+
+    msg = bot.send_message(chat_id, REQUEST_STEPS["car_type"])
+    bot.register_next_step_handler(msg, process_car_request_step)
 
 
 @bot.message_handler(commands=["stats"])
@@ -961,17 +1336,18 @@ def cbr_command(message):
 # Main menu creation function
 def main_menu():
     keyboard = types.ReplyKeyboardMarkup(resize_keyboard=True, one_time_keyboard=False)
-    keyboard.add(
-        types.KeyboardButton(CALCULATE_CAR_TEXT),
-        types.KeyboardButton("Ручной расчёт"),
-    )
-    keyboard.add(
-        types.KeyboardButton("Написать менеджеру"),
-        types.KeyboardButton("О нас"),
-        types.KeyboardButton("Telegram-канал"),
-        types.KeyboardButton("Instagram"),
-        types.KeyboardButton("Tik-Tok"),
-    )
+    keyboard.add(types.KeyboardButton("Гид по покупке авто"))
+    keyboard.add(types.KeyboardButton("Расчёт стоимости авто"))
+    keyboard.add(types.KeyboardButton("Заказать автомобиль / Оставить заявку"))
+    return keyboard
+
+
+# Submenu for cost calculation
+def calculation_menu():
+    keyboard = types.ReplyKeyboardMarkup(resize_keyboard=True, one_time_keyboard=False)
+    keyboard.add(types.KeyboardButton("Рассчитать по ссылке"))
+    keyboard.add(types.KeyboardButton("Расчёт вручную"))
+    keyboard.add(types.KeyboardButton("Вернуться в главное меню"))
     return keyboard
 
 
@@ -1298,6 +1674,7 @@ def calculate_cost(link, message):
     get_rub_to_krw_rate()
 
     user_id = message.chat.id
+    is_manager = user_id in MANAGERS  # Check if user is a manager
 
     bot.send_message(
         message.chat.id,
@@ -1542,49 +1919,58 @@ def calculate_cost(link, message):
         dealer_fee_usd = dealer_fee_krw / usd_to_krw_rate
 
         # Формирование сообщения результата
-        result_message = (
-            f"{car_title}\n\n"
-            # f"📅 Возраст: {age_formatted} (дата регистрации: {month}/{year})\n"
-            f"🚗 Пробег: {formatted_mileage}\n"
-            f"🔧 Объём двигателя: {engine_volume_formatted}\n"
-            f"⚙️ КПП: {formatted_transmission}\n\n"
-            f"💰 СТОИМОСТЬ:\n"
-            f"▪️ Цена авто в Корее: ₩{format_number(price_krw)}\n"
-            f"▪️ Цена в USD: ${format_number(price_usd)}\n"
-            f"▪️ Цена в рублях: {format_number(price_rub)} ₽\n\n"
-            f"▪️ ДОПОЛНИТЕЛЬНЫЕ РАСХОДЫ:\n"
-            f"▪️ Услуга дилера/аукциона: ₩{format_number(dealer_fee_krw)} / ${format_number(dealer_fee_usd)}\n"
-            f"▪️ Доставка до Владивостока: {'седан - $' if car_engine_displacement < 2500 else 'кроссовер - $'}{format_number(delivery_fee_usd)}\n"
-            f"▪️ Сумма в Invoice для оплаты: ₩{format_number(price_krw + dealer_fee_krw + (delivery_fee_usd * usd_to_krw_rate))}\n\n"
-            f"▪️ ТАМОЖЕННЫЕ ПЛАТЕЖИ:\n"
-            f"• Таможенная пошлина: {format_number(customs_duty)} ₽\n"
-            f"• Таможенные сборы: {format_number(customs_fee)} ₽\n"
-            f"• Утилизационный сбор: {format_number(recycling_fee)} ₽\n"
-            f"• Брокерские услуги: 85 000.00 ₽\n"
-            f"  (СВХ + СБКТС + лаборатория + перегон)\n\n"
-            f"▪️ ИТОГОВАЯ СТОИМОСТЬ:\n"
-            f"• Владивосток: {format_number(total_cost_vladivostok)} ₽\n"
-            f"• Доставка до Москвы: от 180 000.00 ₽\n\n"
-            f"🔗 <a href='{preview_link}'>Ссылка на автомобиль</a>\n\n"
-            f"⚠️ Если данное авто попадает под санкции, уточните возможность отправки у наших менеджеров:\n\n"
-            f"📱 +82-10-7626-1999\n"
-            f"📱 +82-10-7934-6603\n"
-            f"📢 <a href='https://t.me/HYT_Trading'>Официальный телеграм канал</a>"
-        )
+        if is_manager:
+            # Полное сообщение для менеджеров
+            result_message = (
+                f"{car_title}\n\n"
+                f"📅 Возраст: {age_formatted} (дата регистрации: {month}/{year})\n"
+                f"🚗 Пробег: {formatted_mileage}\n"
+                f"🔧 Объём двигателя: {engine_volume_formatted}\n"
+                f"⚙️ КПП: {formatted_transmission}\n\n"
+                f"💰 СТОИМОСТЬ:\n"
+                f"▪️ Цена авто в Корее: ₩{format_number(price_krw)}\n"
+                f"▪️ Цена в USD: ${format_number(price_usd)}\n"
+                f"▪️ Цена в рублях: {format_number(price_rub)} ₽\n\n"
+                f"▪️ ДОПОЛНИТЕЛЬНЫЕ РАСХОДЫ:\n"
+                f"▪️ Услуга дилера/аукциона: ₩{format_number(dealer_fee_krw)} / ${format_number(dealer_fee_usd)}\n"
+                f"▪️ Доставка до Владивостока: {'седан - $' if car_engine_displacement < 2500 else 'кроссовер - $'}{format_number(delivery_fee_usd)}\n"
+                f"▪️ Сумма в Invoice для оплаты: ₩{format_number(price_krw + dealer_fee_krw + (delivery_fee_usd * usd_to_krw_rate))}\n\n"
+                f"▪️ ТАМОЖЕННЫЕ ПЛАТЕЖИ:\n"
+                f"• Таможенная пошлина: {format_number(customs_duty)} ₽\n"
+                f"• Таможенные сборы: {format_number(customs_fee)} ₽\n"
+                f"• Утилизационный сбор: {format_number(recycling_fee)} ₽\n"
+                f"• Брокерские услуги: 85 000.00 ₽\n"
+                f"  (СВХ + СБКТС + лаборатория + перегон)\n\n"
+                f"▪️ ИТОГОВАЯ СТОИМОСТЬ:\n"
+                f"• Владивосток: {format_number(total_cost_vladivostok)} ₽\n"
+                f"🔗 <a href='{preview_link}'>Ссылка на автомобиль</a>\n\n"
+            )
+        else:
+            # Упрощённое сообщение для клиентов
+            result_message = (
+                f"{car_title}\n\n"
+                f"🚗 Пробег: {formatted_mileage}\n"
+                f"🔧 Объём двигателя: {engine_volume_formatted}\n"
+                f"⚙️ КПП: {formatted_transmission}\n\n"
+                f"▪️ ИТОГОВАЯ СТОИМОСТЬ ПОД КЛЮЧ:\n"
+                f"• Владивосток: {format_number(total_cost_vladivostok)} ₽\n\n"
+                f"🔗 <a href='{preview_link}'>Ссылка на автомобиль</a>\n\n"
+                f"⚠️ Если данное авто попадает под санкции, уточните возможность отправки у наших менеджеров:\n\n"
+                f"📱 +82-10-7626-1999\n"
+                f"📱 +82-10-7934-6603\n"
+                f"📢 <a href='https://t.me/HYT_Trading'>Официальный телеграм канал</a>"
+            )
 
         # Клавиатура с дальнейшими действиями
         keyboard = types.InlineKeyboardMarkup()
-        # keyboard.add(
-        #     types.InlineKeyboardButton("Детали расчёта", callback_data="detail")
-        # )
 
         # Кнопка для добавления в избранное
-        keyboard.add(
-            types.InlineKeyboardButton(
-                "⭐ Добавить в избранное",
-                callback_data=f"add_favorite_{car_id_external}",
-            )
-        )
+        # keyboard.add(
+        #     types.InlineKeyboardButton(
+        #         "⭐ Добавить в избранное",
+        #         callback_data=f"add_favorite_{car_id_external}",
+        #     )
+        # )
 
         if "fem.encar.com" in link:
             keyboard.add(
@@ -1598,11 +1984,11 @@ def calculate_cost(link, message):
                     callback_data="technical_report",
                 )
             )
-        keyboard.add(
-            types.InlineKeyboardButton(
-                "Написать менеджеру", url="https://t.me/HYT_TRADING_KR"
-            )
-        )
+        # keyboard.add(
+        #     types.InlineKeyboardButton(
+        #         "Написать менеджеру", url="https://t.me/HYT_TRADING_KR"
+        #     )
+        # )
         keyboard.add(
             types.InlineKeyboardButton(
                 "Расчёт другого автомобиля",
@@ -1660,6 +2046,21 @@ def calculate_cost(link, message):
             parse_mode="HTML",
             reply_markup=keyboard,
         )
+
+        # Если пользователь не менеджер, отправляем дополнительное сообщение с предложением оставить заявку
+        if not is_manager:
+            request_keyboard = types.InlineKeyboardMarkup()
+            request_keyboard.add(
+                types.InlineKeyboardButton(
+                    "Оставить заявку", callback_data="request_details"
+                )
+            )
+
+            bot.send_message(
+                message.chat.id,
+                "🔥 Хотите узнать точную стоимость и получить персональное предложение? Оставьте заявку прямо сейчас и наши специалисты подготовят для вас детальный расчёт со всеми скидками!",
+                reply_markup=request_keyboard,
+            )
 
         bot.delete_message(
             message.chat.id, processing_message.message_id
@@ -2085,11 +2486,22 @@ def process_engine_volume(message):
     # Запрашиваем стоимость авто (возвращаем к обычному вводу текста)
     keyboard = types.ReplyKeyboardRemove()
 
+    # Информация о формате ввода цены
+    price_info = (
+        "В Корее стоимость часто указывается в 만원 (ман вон) — это укороченное обозначение, "
+        "где 1 ман = 10 000 вон.\n"
+        "Например, если указано 12,400만원, это означает:\n"
+        "12 400 × 10 000 = 124 000 000\n\n"
+        "Пожалуйста, при вводе стоимости указывайте итоговую сумму в полном числовом "
+        "формате — без пробелов, запятых или символов."
+    )
+
+    bot.send_message(message.chat.id, price_info, reply_markup=keyboard)
+
     # Запрашиваем стоимость авто
     bot.send_message(
         message.chat.id,
-        "Введите стоимость автомобиля в корейских вонах (например, 15 000 000):",
-        reply_markup=keyboard,
+        "Введите стоимость автомобиля в корейских вонах (например, 15000000):",
     )
     bot.register_next_step_handler(message, process_car_price)
 
@@ -2113,6 +2525,8 @@ def process_car_price(message):
 
     # Сохраняем стоимость автомобиля
     user_data[message.chat.id]["car_price_krw"] = int(cleaned_input)
+    user_id = message.chat.id
+    is_manager = user_id in MANAGERS  # Check if user is a manager
 
     # Извлекаем данные пользователя
     if message.chat.id not in user_data:
@@ -2172,36 +2586,53 @@ def process_car_price(message):
     dealer_fee_usd = dealer_fee_krw / usd_to_krw_rate
 
     # Формируем сообщение с расчетом стоимости
-    result_message = (
-        f"📅 Возраст: {
-            'До 3 лет' if age_group == '0-3' else
-            'От 3 до 5 лет' if age_group == '3-5' else
-            'От 5 до 7 лет' if age_group == '5-7' else
-            'От 7 лет' if age_group == '7-0' else
-            age_group
-        }\n"
-        f"🔧 Объём двигателя: {engine_volume} cc\n\n"
-        f"💰 СТОИМОСТЬ:\n"
-        f"▪️ Цена авто в Корее: ₩{format_number(car_price_krw)}\n"
-        f"▪️ Цена в USD: ${format_number(price_usd)}\n"
-        f"▪️ Цена в рублях: {format_number(price_rub)} ₽\n\n"
-        f"▪️ ДОПОЛНИТЕЛЬНЫЕ РАСХОДЫ:\n"
-        f"▪️ Услуга дилера/аукциона: ₩{format_number(dealer_fee_krw)} / ${format_number(dealer_fee_usd)}\n"
-        f"▪️ Доставка до Владивостока: {'седан - $' if engine_volume < 2500 else 'кроссовер - $'}{format_number(delivery_fee_usd)}\n"
-        f"▪️ Сумма в Invoice для оплаты: ₩{format_number(car_price_krw + dealer_fee_krw + (delivery_fee_usd * usd_to_krw_rate))}\n\n"
-        f"▪️ ТАМОЖЕННЫЕ ПЛАТЕЖИ:\n"
-        f"• Таможенная пошлина: {format_number(customs_duty)} ₽\n"
-        f"• Таможенные сборы: {format_number(customs_fee)} ₽\n"
-        f"• Утилизационный сбор: {format_number(recycling_fee)} ₽\n"
-        f"• Брокерские услуги: 85 000.00 ₽\n"
-        f"  (СВХ + СБКТС + лаборатория + перегон)\n\n"
-        f"▪️ ИТОГОВАЯ СТОИМОСТЬ:\n"
-        f"• Владивосток: {format_number(total_cost_vladivostok)} ₽\n"
-        f"• Доставка до Москвы: от 180 000.00 ₽\n\n"
-        f"📱 +82-10-7626-1999\n"
-        f"📱 +82-10-7934-6603\n\n"
-        f"📢 <a href='https://t.me/HYT_Trading'>Официальный телеграм канал</a>"
-    )
+    if is_manager:
+        result_message = (
+            f"📅 Возраст: {
+                'До 3 лет' if age_group == '0-3' else
+                'От 3 до 5 лет' if age_group == '3-5' else
+                'От 5 до 7 лет' if age_group == '5-7' else
+                'От 7 лет' if age_group == '7-0' else
+                age_group
+                }\n"
+            f"🔧 Объём двигателя: {engine_volume} cc\n\n"
+            f"💰 СТОИМОСТЬ:\n"
+            f"▪️ Цена авто в Корее: ₩{format_number(car_price_krw)}\n"
+            f"▪️ Цена в USD: ${format_number(price_usd)}\n"
+            f"▪️ Цена в рублях: {format_number(price_rub)} ₽\n\n"
+            f"▪️ ДОПОЛНИТЕЛЬНЫЕ РАСХОДЫ:\n"
+            f"▪️ Услуга дилера/аукциона: ₩{format_number(dealer_fee_krw)} / ${format_number(dealer_fee_usd)}\n"
+            f"▪️ Доставка до Владивостока: {'седан - $' if engine_volume < 2500 else 'кроссовер - $'}{format_number(delivery_fee_usd)}\n"
+            f"▪️ Сумма в Invoice для оплаты: ₩{format_number(car_price_krw + dealer_fee_krw + (delivery_fee_usd * usd_to_krw_rate))}\n\n"
+            f"▪️ ТАМОЖЕННЫЕ ПЛАТЕЖИ:\n"
+            f"• Таможенная пошлина: {format_number(customs_duty)} ₽\n"
+            f"• Таможенные сборы: {format_number(customs_fee)} ₽\n"
+            f"• Утилизационный сбор: {format_number(recycling_fee)} ₽\n"
+            f"• Брокерские услуги: 85 000.00 ₽\n"
+            f"  (СВХ + СБКТС + лаборатория + перегон)\n\n"
+            f"▪️ ИТОГОВАЯ СТОИМОСТЬ:\n"
+            f"• Владивосток: {format_number(total_cost_vladivostok)} ₽\n"
+            f"• Доставка до Москвы: от 180 000.00 ₽\n\n"
+        )
+    else:
+        result_message = (
+            f"📅 Возраст: {
+                'До 3 лет' if age_group == '0-3' else
+                'От 3 до 5 лет' if age_group == '3-5' else
+                'От 5 до 7 лет' if age_group == '5-7' else
+                'От 7 лет' if age_group == '7-0' else
+                age_group
+                }\n"
+            f"🔧 Объём двигателя: {engine_volume} cc\n\n"
+            f"💰 СТОИМОСТЬ:\n"
+            f"▪️ Цена авто в Корее: ₩{format_number(car_price_krw)}\n\n"
+            f"▪️ ИТОГОВАЯ СТОИМОСТЬ ПОД КЛЮЧ:\n"
+            f"• Владивосток: {format_number(total_cost_vladivostok)} ₽\n\n"
+            f"⚠️ Если данное авто попадает под санкции, уточните возможность отправки у наших менеджеров:\n\n"
+            f"📱 +82-10-7626-1999\n"
+            f"📱 +82-10-7934-6603\n"
+            f"📢 <a href='https://t.me/HYT_Trading'>Официальный телеграм канал</a>"
+        )
 
     # Клавиатура с дальнейшими действиями
     keyboard = types.InlineKeyboardMarkup()
@@ -2210,11 +2641,11 @@ def process_car_price(message):
             "Рассчитать другой автомобиль", callback_data="calculate_another_manual"
         )
     )
-    keyboard.add(
-        types.InlineKeyboardButton(
-            "Связаться с менеджером", url="https://t.me/HYT_TRADING_KR"
-        )
-    )
+    # keyboard.add(
+    #     types.InlineKeyboardButton(
+    #         "Связаться с менеджером", url="https://t.me/HYT_TRADING_KR"
+    #     )
+    # )
     keyboard.add(types.InlineKeyboardButton("Главное меню", callback_data="main_menu"))
 
     # Отправляем сообщение пользователю
@@ -2228,27 +2659,51 @@ def process_car_price(message):
     # Очищаем данные пользователя после расчета
     del user_data[message.chat.id]
 
+    # Если пользователь не менеджер, отправляем дополнительное сообщение с предложением оставить заявку
+    if not is_manager:
+        request_keyboard = types.InlineKeyboardMarkup()
+        request_keyboard.add(
+            types.InlineKeyboardButton("Оставить заявку", callback_data="car_request")
+        )
+
+        bot.send_message(
+            message.chat.id,
+            "🔥 Хотите узнать точную стоимость и получить персональное предложение? Оставьте заявку прямо сейчас и наши специалисты подготовят для вас детальный расчёт со всеми скидками!",
+            reply_markup=request_keyboard,
+        )
+
 
 @bot.message_handler(func=lambda message: True)
 def handle_message(message):
     user_message = message.text.strip()
     user_id = message.from_user.id
 
-    # Проверяем нажатие кнопки "Рассчитать автомобиль"
-    if user_message == CALCULATE_CAR_TEXT:
+    # Главное меню
+    if user_message == "Гид по покупке авто":
+        bot.send_message(
+            message.chat.id,
+            "Гид по покупке автомобиля находится в разработке. Скоро здесь появится полезная информация!",
+        )
+
+    elif user_message == "Расчёт стоимости авто":
+        bot.send_message(
+            message.chat.id,
+            "Выберите способ расчета стоимости:",
+            reply_markup=calculation_menu(),
+        )
+
+    elif user_message == "Заказать автомобиль / Оставить заявку":
+        # Запускаем процесс заполнения заявки
+        start_new_request(message)
+
+    # Подменю расчета
+    elif user_message == "Рассчитать по ссылке":
         bot.send_message(
             message.chat.id,
             "Пожалуйста, введите ссылку на автомобиль с одного из сайтов (encar.com, kbchachacha.com):",
         )
 
-    # Проверка на корректность ссылки
-    elif re.match(
-        r"^https?://(www|fem)\.encar\.com/.*|^https?://(www\.)?kbchachacha\.com/.*|^https?://m\.kbchachacha\.com/.*",
-        user_message,
-    ):
-        calculate_cost(user_message, message)
-
-    elif user_message == "Ручной расчёт":
+    elif user_message == "Расчёт вручную":
         # Запрашиваем возраст автомобиля
         keyboard = types.ReplyKeyboardMarkup(
             resize_keyboard=True, one_time_keyboard=True
@@ -2263,46 +2718,26 @@ def handle_message(message):
         )
         bot.register_next_step_handler(message, process_car_age)
 
-    # Проверка на другие команды
-    elif user_message == "Написать менеджеру":
-        managers_list = [
-            {"name": "Менеджер 1", "whatsapp": "https://wa.me/821076261999"},
-            {"name": "Менеджер 2", "whatsapp": "https://wa.me/821079346603"},
-        ]
-
-        # Формируем сообщение со списком менеджеров
-        message_text = "Вы можете связаться с одним из наших менеджеров:\n\n"
-        for manager in managers_list:
-            message_text += f"[{manager['name']}]({manager['whatsapp']})\n"
-
-        # Отправляем сообщение с использованием Markdown
-        bot.send_message(message.chat.id, message_text, parse_mode="Markdown")
-
-    elif user_message == "О нас":
-        about_message = "Quickxa\nЮжнокорейская экспортная компания.\nСпециализируемся на поставках автомобилей из Южной Кореи в страны СНГ.\nОпыт работы более 5 лет.\n\nПочему выбирают нас?\n• Надежность и скорость доставки.\n• Индивидуальный подход к каждому клиенту.\n• Полное сопровождение сделки.\n\n💬 Ваш путь к надежным автомобилям начинается здесь!"
-        bot.send_message(message.chat.id, about_message)
-
-    elif user_message == "Telegram-канал":
-        channel_link = "https://t.me/HYT_Trading"
-        bot.send_message(
-            message.chat.id, f"Подписывайтесь на наш Telegram-канал: {channel_link}"
-        )
-    elif user_message == "Instagram":
-        instagram_link = "https://www.instagram.com/hyt_auto"
+    elif user_message == "Вернуться в главное меню":
         bot.send_message(
             message.chat.id,
-            f"Посетите наш Instagram: {instagram_link}",
+            "Главное меню",
+            reply_markup=main_menu(),
         )
-    elif user_message == "Tik-Tok":
-        tiktok_link = "https://www.tiktok.com/@hyt_auto_korea"
-        bot.send_message(
-            message.chat.id,
-            f"Следите за свежим контентом на нашем TikTok: {tiktok_link}",
-        )
+
+    # Проверка на корректность ссылки
+    elif re.match(
+        r"^https?://(www|fem)\.encar\.com/.*|^https?://(www\.)?kbchachacha\.com/.*|^https?://m\.kbchachacha\.com/.*",
+        user_message,
+    ):
+        calculate_cost(user_message, message)
+
+    # В случае неизвестной команды
     else:
         bot.send_message(
             message.chat.id,
-            "Пожалуйста, введите ссылку на автомобиль с сайта (encar.com, kbchachacha.com)",
+            "Пожалуйста, воспользуйтесь кнопками меню для навигации.",
+            reply_markup=main_menu(),
         )
 
 

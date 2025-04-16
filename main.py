@@ -75,7 +75,6 @@ vehicle_no = None
 usd_to_krw_rate = 0
 usd_to_rub_rate = 0
 
-usdt_to_krw_rate = 0
 user_orders = {}
 
 
@@ -842,42 +841,19 @@ def print_message(message):
 
 # Функция для установки команд меню
 def set_bot_commands():
-    """Устанавливает команды бота."""
-    commands = [
-        types.BotCommand("start", "Запустить бота"),
-        types.BotCommand("exchange_rates", "Курсы валют"),
-        types.BotCommand("my_cars", "Мои избранные автомобили"),
-        types.BotCommand("orders", "Список заказов (Для менеджеров)"),
-        types.BotCommand("stats", "Статистика (для менеджеров)"),
-    ]
+    commands = []
 
-    # Проверяем, является ли пользователь менеджером
-    user_id = bot.get_me().id
-    if user_id in MANAGERS:
-        commands.extend(
-            [
-                types.BotCommand("orders", "Просмотр всех заказов (для менеджеров)"),
-            ]
-        )
+    # Публичные команды для обычных пользователей
+    commands.extend(
+        [
+            types.BotCommand("start", "Запустить бота"),
+            types.BotCommand("exchange_rates", "Курсы валют USD/RUB"),
+            types.BotCommand("my_cars", "Мои сохранённые автомобили"),
+            types.BotCommand("orders", "Мои заказы"),
+        ]
+    )
 
     bot.set_my_commands(commands)
-
-
-def get_usdt_to_krw_rate():
-    global usdt_to_krw_rate
-
-    # URL для получения курса USDT к KRW
-    url = "https://api.coinbase.com/v2/exchange-rates?currency=USDT"
-    response = requests.get(url)
-    data = response.json()
-
-    # Извлечение курса KRW
-    krw_rate = data["data"]["rates"]["KRW"]
-    usdt_to_krw_rate = float(krw_rate)
-
-    print(f"Курс USDT к KRW -> {str(usdt_to_krw_rate)}")
-
-    return float(krw_rate) + 8
 
 
 def get_rub_to_krw_rate():
@@ -898,7 +874,6 @@ def get_rub_to_krw_rate():
         return None
 
 
-# Функция для получения курсов валют с API
 def get_usd_to_krw_rate():
     global usd_to_krw_rate
 
@@ -913,7 +888,7 @@ def get_usd_to_krw_rate():
         usd_to_krw = data[0]["rate"] + 10
         usd_to_krw_rate = usd_to_krw
 
-        print(f"Курс USD → KRW (с учетом +25 KRW): {usd_to_krw_rate}")
+        print(f"Курс USD → KRW: {usd_to_krw_rate}")
     except requests.RequestException as e:
         print(f"Ошибка при получении курса USD → KRW: {e}")
         usd_to_krw_rate = None
@@ -988,6 +963,7 @@ def main_menu():
     keyboard = types.ReplyKeyboardMarkup(resize_keyboard=True, one_time_keyboard=False)
     keyboard.add(
         types.KeyboardButton(CALCULATE_CAR_TEXT),
+        types.KeyboardButton("Ручной расчёт"),
     )
     keyboard.add(
         types.KeyboardButton("Написать менеджеру"),
@@ -1316,11 +1292,10 @@ def get_car_info(url):
 
 # Function to calculate the total cost
 def calculate_cost(link, message):
-    global car_data, car_id_external, car_month, car_year, krw_rub_rate, eur_rub_rate, rub_to_krw_rate, usd_rate, usdt_to_krw_rate
+    global car_data, car_id_external, car_month, car_year, krw_rub_rate, eur_rub_rate, rub_to_krw_rate, usd_rate
 
     get_currency_rates()
     get_rub_to_krw_rate()
-    get_usdt_to_krw_rate()
 
     user_id = message.chat.id
 
@@ -1538,34 +1513,21 @@ def calculate_cost(link, message):
 
         # Сохраняем все данные в car_data для последующей передачи в детализацию
         car_data = {
-            "title": car_title,
-            "age": age_formatted,
-            "registration_date": f"{month}/{year}",
+            "name": car_title,
+            "car_id": car_id,
+            "year": year,
+            "month": month,
             "mileage": formatted_mileage,
-            "engine_volume": engine_volume_formatted,
+            "engine_volume": car_engine_displacement,
             "transmission": formatted_transmission,
-            "price_rub": price_rub,
-            "price_usd": price_usd,
-            "price_krw": price_krw,
-            "dealer_fee_krw": dealer_fee_krw,
-            "dealer_fee_usd": dealer_fee_usd,
-            "dealer_fee_rub": dealer_fee_rub,
-            "delivery_type": "седан" if car_engine_displacement < 2500 else "кроссовер",
-            "delivery_fee_usd": delivery_fee,
-            "delivery_fee_rub": delivery_fee_rub,
-            "customs_duty": customs_duty,
-            "customs_fee": customs_fee,
-            "recycling_fee": recycling_fee,
-            "broker_fee": broker_fee,
-            "total_cost_vladivostok": total_cost_vladivostok,
-            "moscow_delivery_fee": moscow_delivery_fee,
-            "total_cost_moscow": total_cost_moscow,
-            "usdt_to_krw_rate": usdt_to_krw_rate,
-            "usd_to_rub_rate": usd_to_rub_rate,
-            "usd_to_krw_rate": usd_to_krw_rate,
+            "car_price": price_krw,
             "link": preview_link,
-            "car_id": car_id_external,
-            "engine_displacement": car_engine_displacement,
+            "images": car_photos,
+            "total_cost_usd": price_usd,
+            "total_cost_krw": price_krw,
+            "total_cost_rub": total_cost_vladivostok,
+            "usd_to_krw_rate": usd_to_krw_rate,
+            "usd_to_rub_rate": usd_to_rub_rate,
         }
 
         # Сохраняем данные для расчета в глобальные переменные
@@ -1587,23 +1549,22 @@ def calculate_cost(link, message):
             f"🔧 Объём двигателя: {engine_volume_formatted}\n"
             f"⚙️ КПП: {formatted_transmission}\n\n"
             f"💰 СТОИМОСТЬ:\n"
-            f"🇰🇷 Цена авто в Корее: ₩{format_number(price_krw)}\n"
-            f"💵 Цена в USD: ${format_number(price_usd)}\n"
-            f"🇷🇺 Цена в рублях: {format_number(price_rub)} ₽\n\n"
-            f"📋 ДОПОЛНИТЕЛЬНЫЕ РАСХОДЫ:\n"
-            f"🤝 Услуга дилера/аукциона: ₩{format_number(dealer_fee_krw)} / ${format_number(dealer_fee_usd)}\n"
-            f"🚢 Доставка до Владивостока: {'седан - $' if car_engine_displacement < 2500 else 'кроссовер - $'}{format_number(delivery_fee_usd)}\n"
-            f"💳 Сумма в Invoice для оплаты: ₩{format_number(price_krw + dealer_fee_krw + (delivery_fee_usd * usd_to_krw_rate))}\n\n"
-            f"🛃 ТАМОЖЕННЫЕ ПЛАТЕЖИ:\n"
+            f"▪️ Цена авто в Корее: ₩{format_number(price_krw)}\n"
+            f"▪️ Цена в USD: ${format_number(price_usd)}\n"
+            f"▪️ Цена в рублях: {format_number(price_rub)} ₽\n\n"
+            f"▪️ ДОПОЛНИТЕЛЬНЫЕ РАСХОДЫ:\n"
+            f"▪️ Услуга дилера/аукциона: ₩{format_number(dealer_fee_krw)} / ${format_number(dealer_fee_usd)}\n"
+            f"▪️ Доставка до Владивостока: {'седан - $' if car_engine_displacement < 2500 else 'кроссовер - $'}{format_number(delivery_fee_usd)}\n"
+            f"▪️ Сумма в Invoice для оплаты: ₩{format_number(price_krw + dealer_fee_krw + (delivery_fee_usd * usd_to_krw_rate))}\n\n"
+            f"▪️ ТАМОЖЕННЫЕ ПЛАТЕЖИ:\n"
             f"• Таможенная пошлина: {format_number(customs_duty)} ₽\n"
             f"• Таможенные сборы: {format_number(customs_fee)} ₽\n"
             f"• Утилизационный сбор: {format_number(recycling_fee)} ₽\n"
             f"• Брокерские услуги: 85 000.00 ₽\n"
             f"  (СВХ + СБКТС + лаборатория + перегон)\n\n"
-            f"💰 ИТОГОВАЯ СТОИМОСТЬ:\n"
+            f"▪️ ИТОГОВАЯ СТОИМОСТЬ:\n"
             f"• Владивосток: {format_number(total_cost_vladivostok)} ₽\n"
             f"• Доставка до Москвы: от 180 000.00 ₽\n\n"
-            # f"📊 Курс USDT к Воне: <b>₩{format_number(usdt_to_krw_rate)}</b>\n\n"
             f"🔗 <a href='{preview_link}'>Ссылка на автомобиль</a>\n\n"
             f"⚠️ Если данное авто попадает под санкции, уточните возможность отправки у наших менеджеров:\n\n"
             f"📱 +82-10-7626-1999\n"
@@ -1613,9 +1574,9 @@ def calculate_cost(link, message):
 
         # Клавиатура с дальнейшими действиями
         keyboard = types.InlineKeyboardMarkup()
-        keyboard.add(
-            types.InlineKeyboardButton("Детали расчёта", callback_data="detail")
-        )
+        # keyboard.add(
+        #     types.InlineKeyboardButton("Детали расчёта", callback_data="detail")
+        # )
 
         # Кнопка для добавления в избранное
         keyboard.add(
@@ -2046,9 +2007,15 @@ def handle_callback_query(call):
         )
 
     elif call.data == "calculate_another_manual":
+        # Создаем клавиатуру с кнопками выбора возраста
+        keyboard = types.ReplyKeyboardMarkup(
+            resize_keyboard=True, one_time_keyboard=True
+        )
+        keyboard.add("До 3 лет", "От 3 до 5 лет")
+        keyboard.add("От 5 до 7 лет", "Более 7 лет")
+
         msg = bot.send_message(
-            call.message.chat.id,
-            "Выберите возраст автомобиля",
+            call.message.chat.id, "Выберите возраст автомобиля:", reply_markup=keyboard
         )
         bot.register_next_step_handler(msg, process_car_age)
 
@@ -2074,10 +2041,26 @@ def process_car_age(message):
     # Сохраняем возраст авто
     user_data[message.chat.id] = {"car_age": age_mapping[user_input]}
 
-    # Запрашиваем объем двигателя
+    # Создаем обычную клавиатуру с кнопками для выбора объема двигателя
+    keyboard = types.ReplyKeyboardMarkup(
+        resize_keyboard=True, one_time_keyboard=True, row_width=3
+    )
+
+    # Добавляем кнопки с объемами двигателя от 1000 до 4400
+    engine_volumes = []
+    for volume in range(1000, 4401, 200):
+        engine_volumes.append(str(volume))
+
+    # Разбиваем на ряды по 3 кнопки
+    for i in range(0, len(engine_volumes), 3):
+        row = engine_volumes[i : i + 3]
+        keyboard.add(*[types.KeyboardButton(vol) for vol in row])
+
+    # Запрашиваем объем двигателя с помощью обычных кнопок
     bot.send_message(
         message.chat.id,
-        "Введите объем двигателя в см³ (например, 1998):",
+        "Выберите объем двигателя в см³:",
+        reply_markup=keyboard,
     )
     bot.register_next_step_handler(message, process_engine_volume)
 
@@ -2085,10 +2068,13 @@ def process_car_age(message):
 def process_engine_volume(message):
     user_input = message.text.strip()
 
-    # Проверяем, что введено число
-    if not user_input.isdigit():
+    # Проверяем валидность выбора объема двигателя
+    valid_volumes = [str(vol) for vol in range(1000, 4401, 200)]
+
+    if user_input not in valid_volumes:
         bot.send_message(
-            message.chat.id, "Пожалуйста, введите корректный объем двигателя в см³."
+            message.chat.id,
+            "Пожалуйста, выберите объем двигателя из предложенных вариантов.",
         )
         bot.register_next_step_handler(message, process_engine_volume)
         return
@@ -2096,10 +2082,14 @@ def process_engine_volume(message):
     # Сохраняем объем двигателя
     user_data[message.chat.id]["engine_volume"] = int(user_input)
 
+    # Запрашиваем стоимость авто (возвращаем к обычному вводу текста)
+    keyboard = types.ReplyKeyboardRemove()
+
     # Запрашиваем стоимость авто
     bot.send_message(
         message.chat.id,
-        "Введите стоимость автомобиля в корейских вонах (например, 15000000):",
+        "Введите стоимость автомобиля в корейских вонах (например, 15 000 000):",
+        reply_markup=keyboard,
     )
     bot.register_next_step_handler(message, process_car_price)
 
@@ -2109,8 +2099,11 @@ def process_car_price(message):
 
     user_input = message.text.strip()
 
+    # Удаляем все пробелы и другие не-цифровые символы из ввода
+    cleaned_input = "".join(filter(str.isdigit, user_input))
+
     # Проверяем, что введено число
-    if not user_input.isdigit():
+    if not cleaned_input:
         bot.send_message(
             message.chat.id,
             "Пожалуйста, введите корректную стоимость автомобиля в вонах.",
@@ -2119,7 +2112,7 @@ def process_car_price(message):
         return
 
     # Сохраняем стоимость автомобиля
-    user_data[message.chat.id]["car_price_krw"] = int(user_input)
+    user_data[message.chat.id]["car_price_krw"] = int(cleaned_input)
 
     # Извлекаем данные пользователя
     if message.chat.id not in user_data:
@@ -2144,104 +2137,70 @@ def process_car_price(message):
     customs_fee = clean_number(customs_fees["sbor"])  # Таможенный сбор
     recycling_fee = clean_number(customs_fees["util"])  # Утилизационный сбор
 
-    # Расчет итоговой стоимости автомобиля в рублях
-    total_cost_rub = (
-        price_rub
-        + ((1400000 / usd_to_krw_rate) * usd_to_rub_rate)
-        + ((1400000 / usd_to_krw_rate) * usd_to_rub_rate)
-        + ((440000 / usd_to_krw_rate) * usd_to_rub_rate)
-        + 120000
-        + customs_fee
-        + customs_duty
-        + recycling_fee
-        + 13000
-        + 230000
+    # Расчет стоимости брокерских услуг
+    broker_fee = 85000.00  # Брокерские услуги (СВХ + СБКТС + лаборатория + перегон)
+
+    # Расчет стоимости доставки
+    delivery_fee = 850.00 if engine_volume < 2500 else 950.00  # в долларах
+    delivery_fee_rub = delivery_fee * usd_to_rub_rate  # конвертация в рубли
+
+    # Расчет стоимости услуги дилера/аукциона
+    dealer_fee_krw = 440000  # в вонах
+    dealer_fee_usd = dealer_fee_krw / usd_to_krw_rate  # конвертация в доллары
+    dealer_fee_rub = dealer_fee_usd * usd_to_rub_rate  # конвертация в рубли
+
+    # Расчет финальной стоимости автомобиля во Владивостоке
+    total_cost_vladivostok = (
+        price_rub  # стоимость авто
+        + customs_duty  # таможенная пошлина
+        + customs_fee  # таможенные сборы
+        + recycling_fee  # утилизационный сбор
+        + broker_fee  # брокерские услуги
+        + delivery_fee_rub  # доставка паромом
     )
 
-    total_cost_krw = (
-        car_price_krw
-        + 1400000
-        + 1400000
-        + 440000
-        + (120000 / usd_to_rub_rate) * usd_to_krw_rate
-        + (customs_fee / usd_to_rub_rate) * usd_to_krw_rate
-        + (customs_duty / usd_to_rub_rate) * usd_to_krw_rate
-        + (recycling_fee / usd_to_rub_rate) * usd_to_krw_rate
-        + (13000 / usd_to_rub_rate) * usd_to_krw_rate
-        + (230000 / usd_to_rub_rate) * usd_to_krw_rate
-    )
+    # Расчет стоимости доставки до Москвы
+    moscow_delivery_fee = 180000.00  # минимальная стоимость доставки до Москвы
 
-    total_cost_usd = (
-        price_usd
-        + (1400000 / usd_to_krw_rate)
-        + (1400000 / usd_to_krw_rate)
-        + (440000 / usd_to_krw_rate)
-        + (120000 / usd_to_rub_rate)
-        + (customs_fee / usd_to_rub_rate)
-        + (customs_duty / usd_to_rub_rate)
-        + (recycling_fee / usd_to_rub_rate)
-        + (13000 / usd_to_rub_rate)
-        + (230000 / usd_to_rub_rate)
-    )
+    # Расчет полной стоимости с доставкой до Москвы
+    total_cost_moscow = total_cost_vladivostok + moscow_delivery_fee
 
-    company_fees_krw = 1400000
-    company_fees_usd = 1400000 / usdt_to_krw_rate
-    company_fees_rub = (1400000 / usd_to_krw_rate) * usd_to_rub_rate
-
-    freight_korea_krw = 1400000
-    freight_korea_usd = 1400000 / usd_to_krw_rate
-    freight_korea_rub = (1400000 / usd_to_krw_rate) * usd_to_rub_rate
-
-    dealer_korea_krw = 440000
-    dealer_korea_usd = 440000 / usd_to_krw_rate
-    dealer_korea_rub = (440000 / usd_to_krw_rate) * usd_to_rub_rate
-
-    broker_russia_rub = 120000
-    broker_russia_usd = 120000 / usd_to_rub_rate
-    broker_russia_krw = (120000 / usd_to_rub_rate) * usd_to_krw_rate
-
-    customs_duty_rub = customs_duty
-    customs_duty_usd = customs_duty / usd_to_rub_rate
-    customs_duty_krw = (customs_duty / usd_to_rub_rate) * usd_to_krw_rate
-
-    customs_fee_rub = customs_fee
-    customs_fee_usd = customs_fee / usd_to_rub_rate
-    customs_fee_krw = (customs_fee / usd_to_rub_rate) * usd_to_krw_rate
-
-    util_fee_rub = recycling_fee
-    util_fee_usd = recycling_fee / usd_to_rub_rate
-    util_fee_krw = (recycling_fee / usd_to_rub_rate) * usd_to_krw_rate
-
-    vladivostok_transfer_rub = 13000
-    vladivostok_transfer_usd = 13000 / usd_to_rub_rate
-    vladivostok_transfer_krw = (13000 / usd_to_rub_rate) * usdt_to_krw_rate
-
-    moscow_transporter_rub = 230000
-    moscow_transporter_usd = 230000 / usd_to_rub_rate
-    moscow_transporter_krw = (230000 / usd_to_rub_rate) * usd_to_krw_rate
+    # Определяем стоимость доставки в зависимости от типа авто
+    delivery_fee_usd = 850 if engine_volume < 2500 else 950
+    # Определяем стоимость услуг дилера/аукциона
+    dealer_fee_krw = 440000
+    dealer_fee_usd = dealer_fee_krw / usd_to_krw_rate
 
     # Формируем сообщение с расчетом стоимости
     result_message = (
-        f"💰 <b>Расчёт стоимости автомобиля</b> 💰\n\n"
-        f"📌 Возраст автомобиля: <b>{age_group} лет</b>\n"
-        f"🚗 Объём двигателя: <b>{format_number(engine_volume)} см³</b>\n\n"
-        f"<i>ПЕРВАЯ ЧАСТЬ ОПЛАТЫ (КОРЕЯ)</i>:\n\n"
-        f"Стоимость автомобиля:\n<b>${format_number(price_usd)}</b> | <b>₩{format_number(car_price_krw)}</b> | <b>{format_number(price_rub)} ₽</b>\n\n"
-        f"Услуги фирмы (поиск и подбор авто, документация, 3 осмотра):\n<b>${format_number(company_fees_usd)}</b> | <b>₩{format_number(company_fees_krw)}</b> | <b>{format_number(company_fees_rub)} ₽</b>\n\n"
-        f"Фрахт (отправка в порт, доставка автомобиля на базу, оплата судна):\n<b>${format_number(freight_korea_usd)}</b> | <b>₩{format_number(freight_korea_krw)}</b> | <b>{format_number(freight_korea_rub)} ₽</b>\n\n\n"
-        f"Дилерский сбор:\n<b>${format_number(dealer_korea_usd)}</b> | <b>₩{format_number(dealer_korea_krw)}</b> | <b>{format_number(dealer_korea_rub)} ₽</b>\n\n"
-        f"<i>ВТОРАЯ ЧАСТЬ ОПЛАТЫ (РОССИЯ)</i>:\n\n"
-        f"Брокер-Владивосток:\n<b>${format_number(broker_russia_usd)}</b> | <b>₩{format_number(broker_russia_krw)}</b> | <b>{format_number(broker_russia_rub)} ₽</b>\n\n\n"
-        f"Единая таможенная ставка:\n<b>${format_number(customs_duty_usd)}</b> | <b>₩{format_number(customs_duty_krw)}</b> | <b>{format_number(customs_duty_rub)} ₽</b>\n\n"
-        f"Утилизационный сбор:\n<b>${format_number(util_fee_usd)}</b> | <b>₩{format_number(util_fee_krw)}</b> | <b>{format_number(util_fee_rub)} ₽</b>\n\n\n"
-        f"Таможенное оформление:\n<b>${format_number(customs_fee_usd)}</b> | <b>₩{format_number(customs_fee_krw)}</b> | <b>{format_number(customs_fee_rub)} ₽</b>\n\n"
-        f"Перегон во Владивостоке:\n<b>${format_number(vladivostok_transfer_usd)}</b> | <b>₩{format_number(vladivostok_transfer_krw)}</b> | <b>{format_number(vladivostok_transfer_rub)} ₽</b>\n\n"
-        f"Автовоз до Москвы:\n<b>${format_number(moscow_transporter_usd)}</b> | <b>₩{format_number(moscow_transporter_krw)}</b> | <b>{format_number(moscow_transporter_rub)} ₽</b>\n\n"
-        f"Итого под ключ: \n<b>${format_number(total_cost_usd)}</b> | <b>₩{format_number(total_cost_krw)}</b> | <b>{format_number(total_cost_rub)} ₽</b>\n\n"
-        f"<b>Доставку до вашего города уточняйте у менеджеров:</b>\n"
-        f"▪️ +82-10-7626-1999\n"
-        f"▪️ +82-10-7934-6603\n"
-        # f"▪️ +82 10-5128-8082 (Александр)\n\n"
+        f"📅 Возраст: {
+            'До 3 лет' if age_group == '0-3' else
+            'От 3 до 5 лет' if age_group == '3-5' else
+            'От 5 до 7 лет' if age_group == '5-7' else
+            'От 7 лет' if age_group == '7-0' else
+            age_group
+        }\n"
+        f"🔧 Объём двигателя: {engine_volume} cc\n\n"
+        f"💰 СТОИМОСТЬ:\n"
+        f"▪️ Цена авто в Корее: ₩{format_number(car_price_krw)}\n"
+        f"▪️ Цена в USD: ${format_number(price_usd)}\n"
+        f"▪️ Цена в рублях: {format_number(price_rub)} ₽\n\n"
+        f"▪️ ДОПОЛНИТЕЛЬНЫЕ РАСХОДЫ:\n"
+        f"▪️ Услуга дилера/аукциона: ₩{format_number(dealer_fee_krw)} / ${format_number(dealer_fee_usd)}\n"
+        f"▪️ Доставка до Владивостока: {'седан - $' if engine_volume < 2500 else 'кроссовер - $'}{format_number(delivery_fee_usd)}\n"
+        f"▪️ Сумма в Invoice для оплаты: ₩{format_number(car_price_krw + dealer_fee_krw + (delivery_fee_usd * usd_to_krw_rate))}\n\n"
+        f"▪️ ТАМОЖЕННЫЕ ПЛАТЕЖИ:\n"
+        f"• Таможенная пошлина: {format_number(customs_duty)} ₽\n"
+        f"• Таможенные сборы: {format_number(customs_fee)} ₽\n"
+        f"• Утилизационный сбор: {format_number(recycling_fee)} ₽\n"
+        f"• Брокерские услуги: 85 000.00 ₽\n"
+        f"  (СВХ + СБКТС + лаборатория + перегон)\n\n"
+        f"▪️ ИТОГОВАЯ СТОИМОСТЬ:\n"
+        f"• Владивосток: {format_number(total_cost_vladivostok)} ₽\n"
+        f"• Доставка до Москвы: от 180 000.00 ₽\n\n"
+        f"📱 +82-10-7626-1999\n"
+        f"📱 +82-10-7934-6603\n\n"
+        f"📢 <a href='https://t.me/HYT_Trading'>Официальный телеграм канал</a>"
     )
 
     # Клавиатура с дальнейшими действиями
@@ -2288,6 +2247,21 @@ def handle_message(message):
         user_message,
     ):
         calculate_cost(user_message, message)
+
+    elif user_message == "Ручной расчёт":
+        # Запрашиваем возраст автомобиля
+        keyboard = types.ReplyKeyboardMarkup(
+            resize_keyboard=True, one_time_keyboard=True
+        )
+        keyboard.add("До 3 лет", "От 3 до 5 лет")
+        keyboard.add("От 5 до 7 лет", "Более 7 лет")
+
+        bot.send_message(
+            message.chat.id,
+            "Выберите возраст автомобиля:",
+            reply_markup=keyboard,
+        )
+        bot.register_next_step_handler(message, process_car_age)
 
     # Проверка на другие команды
     elif user_message == "Написать менеджеру":
@@ -2349,8 +2323,8 @@ if __name__ == "__main__":
     # Обновляем курс каждые 12 часов и удаляем вебхук каждые 5 минут
     print("⏱️ Настройка планировщика задач...")
     scheduler = BackgroundScheduler()
-    scheduler.add_job(get_usdt_to_krw_rate, "interval", hours=12)
-    print("💱 Задача обновления курса USDT→KRW добавлена (каждые 12 часов)")
+    scheduler.add_job(get_usd_to_krw_rate, "interval", hours=12)
+    print("💱 Задача обновления курса USD→KRW добавлена (каждые 12 часов)")
     scheduler.add_job(bot.delete_webhook, "interval", minutes=5)
     print("🔄 Задача удаления вебхука добавлена (каждые 5 минут)")
     scheduler.start()

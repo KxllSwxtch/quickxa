@@ -1181,30 +1181,19 @@ def place_order(call):
 @bot.callback_query_handler(func=lambda call: call.data == "check_subscription")
 def check_subscription(call):
     user_id = call.from_user.id
-    chat_member = bot.get_chat_member(f"@{CHANNEL_USERNAME}", user_id)
 
-    if chat_member.status in ["member", "administrator", "creator"]:
-        bot.answer_callback_query(
-            call.id, "✅ Подписка оформлена! Вы можете продолжить расчёты."
-        )
-        # Установить подписку для пользователя в БД
-        update_user_subscription(user_id, True)
-    else:
-        bot.answer_callback_query(
-            call.id,
-            "🚫 Вы не подписались на канал! Оформите подписку, чтобы продолжить.",
-        )
+    # Всегда считаем пользователя подписанным
+    bot.answer_callback_query(
+        call.id, "✅ Подписка оформлена! Вы можете продолжить расчёты."
+    )
+    # Установить подписку для пользователя в БД
+    update_user_subscription(user_id, True)
 
 
 def is_user_subscribed(user_id):
     """Проверяет, подписан ли пользователь на канал."""
-    url = f"https://api.telegram.org/bot{BOT_TOKEN}/getChatMember?chat_id={CHANNEL_USERNAME}&user_id={user_id}"
-    response = requests.get(url).json()
-    return response.get("ok") and response.get("result", {}).get("status") in [
-        "member",
-        "administrator",
-        "creator",
-    ]
+    # Всегда возвращаем True, считая пользователя подписанным
+    return True
 
 
 def print_message(message):
@@ -1670,51 +1659,7 @@ def get_car_info(url):
 def calculate_cost(link, message):
     global car_data, car_id_external, car_month, car_year, krw_rub_rate, eur_rub_rate, rub_to_krw_rate, usd_rate
 
-    get_currency_rates()
-    get_rub_to_krw_rate()
-
-    user_id = message.chat.id
-    is_manager = user_id in MANAGERS  # Check if user is a manager
-
-    bot.send_message(
-        message.chat.id,
-        "✅ Подгружаю актуальный курс валют и делаю расчёты. ⏳ Пожалуйста подождите...",
-        parse_mode="Markdown",
-    )
-
-    # Если пользователь в списке FREE_ACCESS_USERS, он получает бесконечные расчёты
-    if user_id in FREE_ACCESS_USERS:
-        user_subscription = True
-    else:
-        # Проверяем подписку в БД
-        user_subscription = check_user_subscription(user_id)
-
-        # Если в БД нет подписки – проверяем через API
-        if not user_subscription:
-            user_subscription = is_user_subscribed(user_id)
-            if user_subscription:
-                update_user_subscription(user_id, True)  # ✅ Обновляем подписку в БД
-
-    # Проверяем количество расчётов
-    user_calc_count = get_calculation_count(user_id)
-
-    if user_calc_count >= 2 and not user_subscription:
-        keyboard = types.InlineKeyboardMarkup()
-        keyboard.add(
-            types.InlineKeyboardButton(
-                "🚀 Оформить подписку", url=f"https://t.me/{CHANNEL_USERNAME}"
-            )
-        )
-        keyboard.add(
-            types.InlineKeyboardButton("✅ Готово", callback_data="check_subscription")
-        )
-
-        bot.send_message(
-            message.chat.id,
-            "🚫 У вас закончились бесплатные расчёты. Чтобы продолжить, оформите подписку.",
-            reply_markup=keyboard,
-        )
-        return
+    user_id = message.from_user.id
 
     # Увеличиваем счётчик расчётов
     increment_calculation_count(user_id)
@@ -1723,6 +1668,17 @@ def calculate_cost(link, message):
 
     # Отправляем сообщение и сохраняем его ID
     processing_message = bot.send_message(message.chat.id, "Обрабатываю данные... ⏳")
+
+    get_currency_rates()
+    get_rub_to_krw_rate()
+
+    is_manager = user_id in MANAGERS  # Check if user is a manager
+
+    bot.send_message(
+        message.chat.id,
+        "✅ Подгружаю актуальный курс валют и делаю расчёты. ⏳ Пожалуйста подождите...",
+        parse_mode="Markdown",
+    )
 
     car_id = None
     car_title = ""

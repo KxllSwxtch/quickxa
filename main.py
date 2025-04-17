@@ -1504,6 +1504,7 @@ def get_car_info(url):
             car_photos,
             year,
             month,
+            car_type,
         ]
     elif "kbchachacha.com" in url:
         url = f"https://www.kbchachacha.com/public/car/detail.kbc?carSeq={car_id_external}"
@@ -1539,6 +1540,7 @@ def get_car_info(url):
                 car_mileage = None
                 car_fuel = None
                 car_engine_displacement = None
+                car_type = None
 
                 for row in rows:
                     headers = row.find_all("th")
@@ -1558,8 +1560,28 @@ def get_car_info(url):
                             car_fuel = value_text
                         elif header_text == "배기량":  # Объем двигателя
                             car_engine_displacement = value_text
+                        elif header_text == "차종토":
+                            car_type = value_text
             else:
                 print("❌ Таблица информации не найдена")
+
+            # Проверяем, есть ли объем двигателя, и если нет или он равен 0, извлекаем его из названия авто
+            if (
+                not car_engine_displacement
+                or car_engine_displacement == "0cc"
+                or car_engine_displacement == "0"
+            ):
+                # Ищем числа с десятичной точкой (например, 3.0) в названии автомобиля
+                engine_volume_match = re.search(r"(\d+\.\d+)", car_name)
+                if engine_volume_match:
+                    # Извлекаем значение объема и умножаем на 1000 для перевода в кубические сантиметры
+                    engine_volume_liters = float(engine_volume_match.group(1))
+                    car_engine_displacement = (
+                        str(int(engine_volume_liters * 1000)) + "cc"
+                    )
+                    print(
+                        f"Извлечен объем двигателя из названия авто: {car_engine_displacement}"
+                    )
 
             car_info = {
                 "name": car_name,
@@ -1571,6 +1593,7 @@ def get_car_info(url):
                 "fuel": car_fuel,
                 "engine_volume": car_engine_displacement,
                 "transmission": "오토",
+                "type": car_type,
             }
 
             return car_info
@@ -1578,122 +1601,6 @@ def get_car_info(url):
             print(
                 "❌ Не удалось найти JSON-данные в <script type='application/ld+json'>"
             )
-    elif "chutcha" in url:
-        print("🔍 Парсим Chutcha.net...")
-
-        headers = {
-            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36",
-            "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7",
-            "Accept-Language": "en,ru;q=0.9,en-CA;q=0.8,la;q=0.7,fr;q=0.6,ko;q=0.5",
-            "Referer": "https://web.chutcha.net/bmc/search?brandGroup=1&modelTree=%7B%7D&priceRange=0%2C0&mileage=0%2C0&year=&saleType=&accident=&fuel=&transmission=&region=&color=&option=&cpo=&theme=&sort=1&currPage=&carType=",
-        }
-
-        response = requests.get(url, headers=headers)
-
-        soup = BeautifulSoup(response.text, "lxml")
-
-        # Extract JSON data from <script type="application/ld+json">
-        script_tag = soup.find("script", {"type": "application/json"})
-        vehicle_data = None
-
-        if not script_tag:
-            return "Error: JSON data not found"
-
-        try:
-            data = json.loads(script_tag.string)
-        except json.JSONDecodeError:
-            return "Error: Failed to parse JSON"
-
-        # Перемещение к ldJson (содержит основную информацию о машине)
-        vehicle_data = (
-            data.get("props", {})
-            .get("pageProps", {})
-            .get("dehydratedState", {})
-            .get("queries", [])[0]
-            .get("state", {})
-            .get("data", {})
-        )
-
-        # Получение изображений
-        img_list_data = vehicle_data.get("img_list", [])
-        img_list = []
-        for query in img_list_data:
-            img_list.append(
-                f"https://imgsc.chutcha.kr{query.get('img_path','').replace('.jpg', '_ori.jpg')}?s=1024x768&t=crop"
-            )
-
-        name = (
-            vehicle_data.get("base_info", {}).get("brand_name", "")
-            + " "
-            + vehicle_data.get("base_info", {}).get("model_name", "")
-            + " "
-            + vehicle_data.get("base_info", {}).get("sub_model_name", "")
-            + " "
-            + vehicle_data.get("base_info", {}).get("grade_name", "")
-        )
-        car_price = vehicle_data.get("base_info", {}).get("plain_price", "")
-        car_number = vehicle_data.get("base_info", {}).get("number_plate", "")
-        car_year = vehicle_data.get("base_info", {}).get("first_reg_year", "")[2:]
-        car_month = str(
-            vehicle_data.get("base_info", {}).get("first_reg_month", "")
-        ).zfill(2)
-        car_mileage = vehicle_data.get("base_info", {}).get("plain_mileage", "")
-        car_fuel = vehicle_data.get("base_info", {}).get("fuel_name", "")
-        car_engine_displacement = vehicle_data.get("base_info", {}).get(
-            "displacement", ""
-        )
-        car_transmission = vehicle_data.get("base_info", {}).get(
-            "transmission_name", ""
-        )
-
-        # Список всех страховых
-        car_history = (
-            vehicle_data.get("safe_info", {})
-            .get("carhistory_safe", {})
-            .get("insurance", {})
-            .get("list", [])
-        )
-
-        # Инициализация сумм страховых выплат
-        own_damage_total = 0  # Выплаты по текущему авто
-        other_damage_total = 0  # Выплаты по другим авто
-
-        # Обработка выплат, если они есть
-        if car_history or len(car_history.get("price", "")) > 0:
-            for claim in car_history:
-                claim_type = claim.get("type")
-                claim_price = (
-                    int(claim["price"])
-                    if claim.get("price") and claim["price"].isdigit()
-                    else 0
-                )
-
-                if claim_type == "1":  # Выплаты по текущему авто
-                    own_damage_total += claim_price
-                elif claim_type == "2":  # Выплаты по другим авто
-                    other_damage_total += claim_price
-
-        # Формирование итогового JSON
-        car_info = {
-            "name": name,
-            "car_price": car_price,
-            "images": img_list,
-            "number": car_number,
-            "year": car_year,
-            "month": car_month,
-            "mileage": car_mileage,
-            "fuel": car_fuel,
-            "engine_volume": car_engine_displacement,
-            "transmission": car_transmission,
-            "insurance_claims": {
-                "own_damage_total": own_damage_total if car_history else "Недоступно",
-                "other_damage_total": (
-                    other_damage_total if car_history else "Недоступно"
-                ),
-            },
-        }
-
-        return car_info
 
 
 # Function to calculate the total cost
@@ -1723,6 +1630,7 @@ def calculate_cost(link, message):
 
     car_id = None
     car_title = ""
+    car_type = None
 
     if "fem.encar.com" in link:
         car_id_match = re.findall(r"\d+", link)
@@ -1765,16 +1673,18 @@ def calculate_cost(link, message):
             car_photos,
             year,
             month,
+            car_type,
         ) = result
 
         preview_link = f"https://fem.encar.com/cars/detail/{car_id}"
+        car_type = car_type
 
     # Если ссылка с kbchacha
     if "kbchachacha.com" in link:
         result = get_car_info(link)
 
         car_title = result["name"]
-
+        car_type = result["type"]
         match = re.search(r"(\d{2})년(\d{2})월", result["year"])
         if match:
             car_year = match.group(1)
@@ -1786,7 +1696,26 @@ def calculate_cost(link, message):
         month = car_month
         year = car_year
 
-        car_engine_displacement = re.sub(r"[^\d]", "", result["engine_volume"])
+        # Обработка объема двигателя - удаляем 'cc' суффикс если есть и конвертируем в число
+        engine_vol = result["engine_volume"]
+        if engine_vol:
+            # Удаляем все нецифровые символы, включая 'cc'
+            car_engine_displacement = re.sub(r"[^\d]", "", engine_vol)
+            if not car_engine_displacement or car_engine_displacement == "0":
+                # Если объем все равно не получен или равен 0, ищем в названии авто
+                engine_volume_match = re.search(r"(\d+\.\d+)", car_title)
+                if engine_volume_match:
+                    engine_volume_liters = float(engine_volume_match.group(1))
+                    car_engine_displacement = str(int(engine_volume_liters * 1000))
+        else:
+            # Если объем не указан, попробуем извлечь из названия авто
+            engine_volume_match = re.search(r"(\d+\.\d+)", car_title)
+            if engine_volume_match:
+                engine_volume_liters = float(engine_volume_match.group(1))
+                car_engine_displacement = str(int(engine_volume_liters * 1000))
+            else:
+                car_engine_displacement = "0"  # Значение по умолчанию
+
         car_price = int(result["car_price"]) / 10000
         formatted_car_date = f"01{car_month}{match.group(1)}"
         formatted_mileage = result["mileage"]
@@ -1850,10 +1779,22 @@ def calculate_cost(link, message):
             engine_type=1,
         )
 
-        # Таможенный сбор
-        customs_fee = clean_number(response["sbor"])
-        customs_duty = clean_number(response["tax"])
-        recycling_fee = clean_number(response["util"])
+        # Проверяем наличие и валидность ответа
+        if response and isinstance(response, dict):
+            try:
+                customs_fee = clean_number(response["sbor"])
+                customs_duty = clean_number(response["tax"])
+                recycling_fee = clean_number(response["util"])
+            except (KeyError, ValueError) as e:
+                print(f"Ошибка при обработке таможенных платежей: {e}")
+                customs_fee = 0
+                customs_duty = 0
+                recycling_fee = 0
+        else:
+            print("Ошибка: не удалось получить данные о таможенных платежах")
+            customs_fee = 0
+            customs_duty = 0
+            recycling_fee = 0
 
         # Расчет стоимости брокерских услуг
         broker_fee = 85000.00  # Брокерские услуги (СВХ + СБКТС + лаборатория + перегон)
@@ -1869,13 +1810,24 @@ def calculate_cost(link, message):
         dealer_fee_usd = dealer_fee_krw / usd_to_krw_rate  # конвертация в доллары
         dealer_fee_rub = dealer_fee_usd * usd_to_rub_rate  # конвертация в рубли
 
+        # Расчет стоимости оформления и перевозки по Корее
+        kr_documentation_fee_krw = 300000  # в вонах
+        kr_documentation_fee_usd = (
+            kr_documentation_fee_krw / usd_to_krw_rate
+        )  # конвертация в доллары
+        kr_documentation_fee_rub = (
+            kr_documentation_fee_usd * usd_to_rub_rate
+        )  # конвертация в рубли
+
         # Расчет финальной стоимости автомобиля во Владивостоке
         total_cost_vladivostok = (
             price_rub  # стоимость авто
+            + dealer_fee_rub  # услуги дилера/аукциона
+            + kr_documentation_fee_rub  # оформление, снятие с учёта и перевозка по Корее
             + customs_duty  # таможенная пошлина
             + customs_fee  # таможенные сборы
             + recycling_fee  # утилизационный сбор
-            + broker_fee  # брокерские услуги
+            + broker_fee  # брокерские услуги (СВХ + СБКТС + лаборатория + перегон)
             + delivery_fee_rub  # доставка паромом
         )
 
@@ -1910,13 +1862,13 @@ def calculate_cost(link, message):
         total_cost_rub = total_cost_vladivostok
 
         # Определяем стоимость доставки в зависимости от типа авто
-        delivery_fee_usd = 850 if car_engine_displacement < 2500 else 950
+        delivery_fee_usd = 850 if car_type == "SUV" else 750
         # Определяем стоимость услуг дилера/аукциона
         dealer_fee_krw = 440000
         dealer_fee_usd = dealer_fee_krw / usd_to_krw_rate
 
         # Формирование сообщения результата
-        if is_manager:
+        if message.from_user.id in MANAGERS:
             # Полное сообщение для менеджеров
             result_message = (
                 f"{car_title}\n\n"
@@ -1929,8 +1881,7 @@ def calculate_cost(link, message):
                 f"• Услуги дилера / аукциона: 🔧 {format_number(dealer_fee_krw)}₩\n"
                 f"• Оформление, снятие с учёта + перевозка по Корее: 📄 300 000₩\n\n"
                 f"⛴ Доставка до Владивостока (Ro-Ro):\n"
-                f"• Седан: 750 $\n"
-                f"• Кроссовер: 850 $\n\n"
+                f"• {('Кроссовер: 850 $' if car_engine_displacement >= 2500 else 'Седан: 750 $')}\n\n"
                 f"🧾 К оплате по инвойсу:\n"
                 f"• 💵 В долларах: {format_number(price_usd + dealer_fee_usd + delivery_fee_usd)} $\n"
                 f"• 💱 В вонах: {format_number(price_krw + dealer_fee_krw + (delivery_fee_usd * usd_to_krw_rate))} ₩\n\n"
@@ -1940,18 +1891,23 @@ def calculate_cost(link, message):
                 f"💼 Брокерские услуги (включено):\n"
                 f"СВХ + СБКТС + лаборатория + перегон: 85 000 ₽\n\n"
                 f"▪️ ИТОГОВАЯ СТОИМОСТЬ:\n\n"
-                f"• Владивосток: {format_number(total_cost_vladivostok)} ₽\n\n"
+                f"• Владивосток: {format_number(total_cost_vladivostok)} ₽\n"
+                f"• Москва: {format_number(total_cost_moscow)} ₽\n\n"
                 f"🔗 <a href='{preview_link}'>Ссылка на автомобиль</a>\n\n"
+                f"⚠️ Если данное авто попадает под санкции, уточните возможность отправки у наших менеджеров:\n\n"
+                f"📱 +82-10-7626-1999\n"
+                f"📱 +82-10-7934-6603\n"
+                f"📢 <a href='https://t.me/HYT_Trading'>Официальный телеграм канал</a>"
             )
         else:
-            # Упрощённое сообщение для клиентов
+            # Упрощённое сообщение для клиентов (только информация об автомобиле и стоимость)
             result_message = (
                 f"🏎 Модель: {car_title}\n"
-                f"◾️ Год: {year} / {month}\n"
+                f"◾️ Год: {formatted_car_year} / {month}\n"
                 f"🛣 Пробег: {formatted_mileage}\n"
-                f"🛞 Тип КПП\\Объём двигателя: {formatted_transmission} \\ {engine_volume_formatted}\n"
-                f"💰 Цена в Южной Корее: {format_number(price_krw)}₩\n"
-                f"💵 Финальная стоимость во Владивостоке на текущий день: {format_number(total_cost_vladivostok)} ₽\n\n"
+                f"🛞 Тип КПП: {formatted_transmission}\n"
+                f"🔧 Объём двигателя: {engine_volume_formatted}\n\n"
+                f"💰 Цена в Южной Корее: {format_number(price_krw)}₩\n\n"
                 f"🔗 <a href='{preview_link}'>Ссылка на автомобиль</a>\n\n"
                 f"⚠️ Если данное авто попадает под санкции, уточните возможность отправки у наших менеджеров:\n\n"
                 f"📱 +82-10-7626-1999\n"
@@ -2565,13 +2521,24 @@ def process_car_price(message):
     dealer_fee_usd = dealer_fee_krw / usd_to_krw_rate  # конвертация в доллары
     dealer_fee_rub = dealer_fee_usd * usd_to_rub_rate  # конвертация в рубли
 
+    # Расчет стоимости оформления и перевозки по Корее
+    kr_documentation_fee_krw = 300000  # в вонах
+    kr_documentation_fee_usd = (
+        kr_documentation_fee_krw / usd_to_krw_rate
+    )  # конвертация в доллары
+    kr_documentation_fee_rub = (
+        kr_documentation_fee_usd * usd_to_rub_rate
+    )  # конвертация в рубли
+
     # Расчет финальной стоимости автомобиля во Владивостоке
     total_cost_vladivostok = (
         price_rub  # стоимость авто
+        + dealer_fee_rub  # услуги дилера/аукциона
+        + kr_documentation_fee_rub  # оформление, снятие с учёта и перевозка по Корее
         + customs_duty  # таможенная пошлина
         + customs_fee  # таможенные сборы
         + recycling_fee  # утилизационный сбор
-        + broker_fee  # брокерские услуги
+        + broker_fee  # брокерские услуги (СВХ + СБКТС + лаборатория + перегон)
         + delivery_fee_rub  # доставка паромом
     )
 
@@ -2582,7 +2549,7 @@ def process_car_price(message):
     total_cost_moscow = total_cost_vladivostok + moscow_delivery_fee
 
     # Определяем стоимость доставки в зависимости от типа авто
-    delivery_fee_usd = 850 if engine_volume < 2500 else 950
+    delivery_fee_usd = 850 if engine_volume >= 2500 else 750
     # Определяем стоимость услуг дилера/аукциона
     dealer_fee_krw = 440000
     dealer_fee_usd = dealer_fee_krw / usd_to_krw_rate

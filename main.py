@@ -1779,22 +1779,9 @@ def calculate_cost(link, message):
             engine_type=1,
         )
 
-        # Проверяем наличие и валидность ответа
-        if response and isinstance(response, dict):
-            try:
-                customs_fee = clean_number(response["sbor"])
-                customs_duty = clean_number(response["tax"])
-                recycling_fee = clean_number(response["util"])
-            except (KeyError, ValueError) as e:
-                print(f"Ошибка при обработке таможенных платежей: {e}")
-                customs_fee = 0
-                customs_duty = 0
-                recycling_fee = 0
-        else:
-            print("Ошибка: не удалось получить данные о таможенных платежах")
-            customs_fee = 0
-            customs_duty = 0
-            recycling_fee = 0
+        customs_fee = clean_number(response.get("sbor", 0))  # таможенные сборы
+        customs_duty = clean_number(response.get("tax", 0))  # таможенная пошлина
+        recycling_fee = clean_number(response.get("util", 0))  # утилизационный сбор
 
         # Расчет стоимости брокерских услуг
         broker_fee = 85000.00  # Брокерские услуги (СВХ + СБКТС + лаборатория + перегон)
@@ -1876,28 +1863,25 @@ def calculate_cost(link, message):
                 f"🚗 Пробег: {formatted_mileage}\n"
                 f"🔧 Объём двигателя: {engine_volume_formatted}\n"
                 f"⚙️ КПП: {formatted_transmission}\n\n"
-                f"💰 СТОИМОСТЬ:\n"
-                f"• Цена авто: ₩{format_number(price_krw)} / ${format_number(price_usd)} / {format_number(price_rub)} ₽\n"
-                f"• Услуги дилера / аукциона: 🔧 {format_number(dealer_fee_krw)}₩\n"
-                f"• Оформление, снятие с учёта + перевозка по Корее: 📄 300 000₩\n\n"
-                f"⛴ Доставка до Владивостока (Ro-Ro):\n"
-                f"• {('Кроссовер: 850 $' if car_engine_displacement >= 2500 else 'Седан: 750 $')}\n\n"
-                f"🧾 К оплате по инвойсу:\n"
-                f"• 💵 В долларах: {format_number(price_usd + dealer_fee_usd + delivery_fee_usd)} $\n"
-                f"• 💱 В вонах: {format_number(price_krw + dealer_fee_krw + (delivery_fee_usd * usd_to_krw_rate))} ₩\n\n"
-                f"🛃 Таможенные платежи (РФ):\n"
-                f"• 📝 Единая таможенная ставка (ЕТС): {format_number(customs_duty)} ₽\n"
-                f"• ♻️ Утилизационный сбор: {format_number(recycling_fee)} ₽\n"
-                f"💼 Брокерские услуги (включено):\n"
-                f"СВХ + СБКТС + лаборатория + перегон: 85 000 ₽\n\n"
-                f"▪️ ИТОГОВАЯ СТОИМОСТЬ:\n\n"
-                f"• Владивосток: {format_number(total_cost_vladivostok)} ₽\n"
-                f"• Москва: {format_number(total_cost_moscow)} ₽\n\n"
+                f"💰 СТОИМОСТЬ АВТОМОБИЛЯ\n"
+                f"• Цена авто: ₩{format_number(price_krw)}\n"
+                f"• Услуги дилера/аукциона: ₩{format_number(dealer_fee_krw)}\n"
+                f"• Оформление, снятие с учёта + перевозка по Корее: ₩300,000\n\n"
+                f"⛴️ ДОСТАВКА\n"
+                f"• До Владивостока (Ro-Ro): ${('850' if car_type == 'SUV' else '750')}\n\n"
+                f"💵 К ОПЛАТЕ ПО ИНВОЙСУ\n"
+                f"• В вонах: ₩{format_number(price_krw + dealer_fee_krw + (delivery_fee_usd * usd_to_krw_rate))}\n"
+                f"• В долларах: ${format_number(price_usd + dealer_fee_usd + delivery_fee_usd)}\n"
+                f"• В рублях: {format_number(price_rub + dealer_fee_rub + kr_documentation_fee_rub + delivery_fee_rub)} ₽\n\n"
+                f"🛃 ТАМОЖЕННЫЕ ПЛАТЕЖИ (РФ)\n"
+                f"• Таможенная пошлина: {format_number(customs_duty)} ₽\n"
+                f"• Таможенные сборы: {format_number(customs_fee)} ₽\n"
+                f"• Утилизационный сбор: {format_number(recycling_fee)} ₽\n\n"
+                f"💼 БРОКЕРСКИЕ УСЛУГИ\n"
+                f"• СВХ + СБКТС + лаборатория + перегон: 85,000 ₽\n\n"
+                f"💰 ИТОГОВАЯ СТОИМОСТЬ\n"
+                f"• Во Владивостоке: {format_number(total_cost_vladivostok)} ₽\n\n"
                 f"🔗 <a href='{preview_link}'>Ссылка на автомобиль</a>\n\n"
-                f"⚠️ Если данное авто попадает под санкции, уточните возможность отправки у наших менеджеров:\n\n"
-                f"📱 +82-10-7626-1999\n"
-                f"📱 +82-10-7934-6603\n"
-                f"📢 <a href='https://t.me/HYT_Trading'>Официальный телеграм канал</a>"
             )
         else:
             # Упрощённое сообщение для клиентов (только информация об автомобиле и стоимость)
@@ -1907,7 +1891,7 @@ def calculate_cost(link, message):
                 f"🛣 Пробег: {formatted_mileage}\n"
                 f"🛞 Тип КПП: {formatted_transmission}\n"
                 f"🔧 Объём двигателя: {engine_volume_formatted}\n\n"
-                f"💰 Цена в Южной Корее: ₩{format_number(price_krw)} / ${format_number(price_usd)}\n\n"
+                f"💰 Финальная стоимость во Владивостоке на текущий день: {format_number(total_cost_vladivostok)} ₽\n\n"
                 f"🔗 <a href='{preview_link}'>Ссылка на автомобиль</a>\n\n"
                 f"⚠️ Если данное авто попадает под санкции, уточните возможность отправки у наших менеджеров:\n\n"
                 f"📱 +82-10-7626-1999\n"
@@ -2607,18 +2591,18 @@ def process_car_price(message):
             )
         )
 
-        result_message = (
-            f"📅 Возраст: {age_display}\n"
-            f"🔧 Объём двигателя: {engine_volume} cc\n\n"
-            f"💰 СТОИМОСТЬ:\n"
-            f"▪️ Цена авто в Корее: ₩{format_number(car_price_krw)}\n\n"
-            f"▪️ ИТОГОВАЯ СТОИМОСТЬ ПОД КЛЮЧ:\n"
-            f"• Владивосток: {format_number(total_cost_vladivostok)} ₽\n\n"
-            f"⚠️ Если данное авто попадает под санкции, уточните возможность отправки у наших менеджеров:\n\n"
-            f"📱 +82-10-7626-1999\n"
-            f"📱 +82-10-7934-6603\n"
-            f"📢 <a href='https://t.me/HYT_Trading'>Официальный телеграм канал</a>"
-        )
+    result_message = (
+        f"📅 Возраст: {age_display}\n"
+        f"🔧 Объём двигателя: {engine_volume} cc\n\n"
+        f"💰 СТОИМОСТЬ:\n"
+        f"▪️ Цена авто в Корее: ₩{format_number(car_price_krw)}\n\n"
+        f"▪️ ИТОГОВАЯ СТОИМОСТЬ ПОД КЛЮЧ:\n"
+        f"• Владивосток: {format_number(total_cost_vladivostok)} ₽\n\n"
+        f"⚠️ Если данное авто попадает под санкции, уточните возможность отправки у наших менеджеров:\n\n"
+        f"📱 +82-10-7626-1999\n"
+        f"📱 +82-10-7934-6603\n"
+        f"📢 <a href='https://t.me/HYT_Trading'>Официальный телеграм канал</a>"
+    )
 
     # Клавиатура с дальнейшими действиями
     keyboard = types.InlineKeyboardMarkup()
@@ -2759,12 +2743,12 @@ def show_acquisition_guide_menu(chat_id):
     for button in buttons:
         keyboard.add(button)
 
-    bot.send_message(
-        chat_id,
-        "📚 <b>ГИД ПО ПРИОБРЕТЕНИЮ АВТОМОБИЛЯ</b>\n\nВыберите интересующий вас раздел:",
-        parse_mode="HTML",
-        reply_markup=keyboard,
-    )
+        bot.send_message(
+            chat_id,
+            "📚 <b>ГИД ПО ПРИОБРЕТЕНИЮ АВТОМОБИЛЯ</b>\n\nВыберите интересующий вас раздел:",
+            parse_mode="HTML",
+            reply_markup=keyboard,
+        )
 
 
 @bot.callback_query_handler(
@@ -2936,13 +2920,13 @@ def handle_guide_sections(call):
         except Exception as e:
             print(f"Ошибка при отправке раздела гида: {e}")
             # Если редактирование не сработало, отправляем новое сообщение
-            bot.send_message(
-                chat_id=chat_id,
-                text=guide_content[guide_section],
-                parse_mode="HTML",
-                reply_markup=keyboard,
-                disable_web_page_preview=True,
-            )
+        bot.send_message(
+            chat_id=chat_id,
+            text=guide_content[guide_section],
+            parse_mode="HTML",
+            reply_markup=keyboard,
+            disable_web_page_preview=True,
+        )
     bot.answer_callback_query(call.id)
 
 

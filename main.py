@@ -1870,8 +1870,8 @@ def calculate_cost(link, message):
                 f"⛴️ ДОСТАВКА\n"
                 f"• До Владивостока (Ro-Ro): ${('850' if car_type == 'SUV' else '750')}\n\n"
                 f"💵 К ОПЛАТЕ ПО ИНВОЙСУ\n"
-                f"• В вонах: ₩{format_number(price_krw + dealer_fee_krw + (delivery_fee_usd * usd_to_krw_rate))}\n"
-                f"• В долларах: ${format_number(price_usd + dealer_fee_usd + delivery_fee_usd)}\n"
+                f"• В вонах: ₩{format_number(price_krw + dealer_fee_krw + kr_documentation_fee_krw + (delivery_fee_usd * usd_to_krw_rate))}\n"
+                f"• В долларах: ${format_number(price_usd + dealer_fee_usd + kr_documentation_fee_usd + delivery_fee_usd)}\n"
                 f"• В рублях: {format_number(price_rub + dealer_fee_rub + kr_documentation_fee_rub + delivery_fee_rub)} ₽\n\n"
                 f"♻️Стоимость  услуг в РФ\n"
                 f"🛃 Таможенные платежи (РФ)\n"
@@ -1880,8 +1880,7 @@ def calculate_cost(link, message):
                 f"• Утилизационный сбор: {format_number(recycling_fee)} ₽\n\n"
                 f"💼 БРОКЕРСКИЕ УСЛУГИ\n"
                 f"• СВХ + СБКТС + лаборатория + перегон: 85,000 ₽\n\n"
-                f"💰 ИТОГОВАЯ СТОИМОСТЬ\n"
-                f"• Во Владивостоке: {format_number(total_cost_vladivostok)} ₽\n\n"
+                f"💰 Финальная стоимость во Владивостоке на текущий день: {format_number(total_cost_vladivostok)} ₽\n\n"
                 f"🔗 <a href='{preview_link}'>Ссылка на автомобиль</a>\n\n"
             )
         else:

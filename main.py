@@ -1858,11 +1858,11 @@ def calculate_cost(link, message):
         if message.from_user.id in MANAGERS:
             # Полное сообщение для менеджеров
             result_message = (
-                f"{car_title}\n\n"
-                f"📅 Возраст: {age_formatted} (дата регистрации: {month}/{year})\n"
-                f"🚗 Пробег: {formatted_mileage}\n"
+                f"🏎 {car_title}\n\n"
+                f"◾️ Возраст: {age_formatted} (дата регистрации: {month}/{year})\n"
+                f"🛣 Пробег: {formatted_mileage}\n"
                 f"🔧 Объём двигателя: {engine_volume_formatted}\n"
-                f"⚙️ КПП: {formatted_transmission}\n\n"
+                f"🛞 КПП: {formatted_transmission}\n\n"
                 f"💰 СТОИМОСТЬ АВТОМОБИЛЯ\n"
                 f"• Цена авто: ₩{format_number(price_krw)}\n"
                 f"• Услуги дилера/аукциона: ₩{format_number(dealer_fee_krw)}\n"
@@ -1873,7 +1873,8 @@ def calculate_cost(link, message):
                 f"• В вонах: ₩{format_number(price_krw + dealer_fee_krw + (delivery_fee_usd * usd_to_krw_rate))}\n"
                 f"• В долларах: ${format_number(price_usd + dealer_fee_usd + delivery_fee_usd)}\n"
                 f"• В рублях: {format_number(price_rub + dealer_fee_rub + kr_documentation_fee_rub + delivery_fee_rub)} ₽\n\n"
-                f"🛃 ТАМОЖЕННЫЕ ПЛАТЕЖИ (РФ)\n"
+                f"♻️Стоимость  услуг в РФ\n"
+                f"🛃 Таможенные платежи (РФ)\n"
                 f"• Таможенная пошлина: {format_number(customs_duty)} ₽\n"
                 f"• Таможенные сборы: {format_number(customs_fee)} ₽\n"
                 f"• Утилизационный сбор: {format_number(recycling_fee)} ₽\n\n"

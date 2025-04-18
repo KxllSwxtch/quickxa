@@ -49,3 +49,13 @@ node_modules/
 
 # Cloudinary uploads
 uploads/
+
+# Database files
+*.db
+*.sqlite3
+
+# Logs
+logs/
+*.log
+
+latest.dump

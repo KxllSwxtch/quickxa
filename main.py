@@ -2650,7 +2650,12 @@ def handle_message(message):
 
     # Главное меню
     if user_message == "Гид по покупке авто":
+        print(
+            f"\n=== DEBUG: Пользователь {user_id} запросил 'Гид по покупке авто' ===\n"
+        )
+        bot.send_chat_action(message.chat.id, "typing")
         show_acquisition_guide_menu(message.chat.id)
+        return
 
     elif user_message == "Расчёт стоимости авто":
         bot.send_message(
@@ -2710,6 +2715,10 @@ def handle_message(message):
 
 def show_acquisition_guide_menu(chat_id):
     """Показывает меню гида по приобретению автомобиля"""
+    print(
+        f"\n=== DEBUG: Вызвана функция show_acquisition_guide_menu для chat_id={chat_id} ===\n"
+    )
+
     keyboard = types.InlineKeyboardMarkup(row_width=1)
     buttons = [
         types.InlineKeyboardButton(
@@ -2743,12 +2752,13 @@ def show_acquisition_guide_menu(chat_id):
     for button in buttons:
         keyboard.add(button)
 
-        bot.send_message(
-            chat_id,
-            "📚 <b>ГИД ПО ПРИОБРЕТЕНИЮ АВТОМОБИЛЯ</b>\n\nВыберите интересующий вас раздел:",
-            parse_mode="HTML",
-            reply_markup=keyboard,
-        )
+    print(f"\n=== DEBUG: Отправляю сообщение с меню для chat_id={chat_id} ===\n")
+    bot.send_message(
+        chat_id,
+        "📚 <b>ГИД ПО ПРИОБРЕТЕНИЮ АВТОМОБИЛЯ</b>\n\nВыберите интересующий вас раздел:",
+        parse_mode="HTML",
+        reply_markup=keyboard,
+    )
 
 
 @bot.callback_query_handler(
@@ -2757,10 +2767,16 @@ def show_acquisition_guide_menu(chat_id):
 def handle_guide_sections(call):
     """Обработчик разделов гида по приобретению автомобиля"""
     chat_id = call.message.chat.id
+    print(f"\n=== DEBUG: Обработка callback {call.data} для chat_id={chat_id} ===\n")
 
     # Обработка запроса на возврат к гиду
     if call.data == "back_to_guide":
-        bot.delete_message(chat_id, call.message.message_id)
+        print(f"\n=== DEBUG: Пользователь {chat_id} запросил возврат к гиду ===\n")
+        try:
+            bot.delete_message(chat_id, call.message.message_id)
+        except Exception as e:
+            print(f"DEBUG: Ошибка при удалении сообщения: {e}")
+
         show_acquisition_guide_menu(chat_id)
         bot.answer_callback_query(call.id)
         return
@@ -2894,6 +2910,11 @@ def handle_guide_sections(call):
 Наш адрес: 인천시 연수구 동춘동 913-1 (913-1, Dongchun-dong, Yeonsu-gu, Incheon)""",
     }
 
+    # Если запрашиваемого раздела нет, отвечаем пользователю и выходим
+    if guide_section not in guide_content:
+        bot.answer_callback_query(call.id, "Раздел не найден")
+        return
+
     # Создаем клавиатуру для возврата в меню гида
     keyboard = types.InlineKeyboardMarkup()
     keyboard.add(
@@ -2905,21 +2926,32 @@ def handle_guide_sections(call):
         types.InlineKeyboardButton("🏠 Главное меню", callback_data="main_menu")
     )
 
-    # Отправляем содержимое выбранного раздела
-    if guide_section in guide_content:
+    # Показываем пользователю, что бот обрабатывает запрос
+    bot.answer_callback_query(call.id)
+
+    try:
+        # Пытаемся отредактировать текущее сообщение
+        print(f"DEBUG: Редактирую сообщение для раздела {guide_section}")
+        bot.edit_message_text(
+            chat_id=chat_id,
+            message_id=call.message.message_id,
+            text=guide_content[guide_section],
+            parse_mode="HTML",
+            reply_markup=keyboard,
+            disable_web_page_preview=True,
+        )
+        print(f"DEBUG: Успешно отредактировано сообщение для раздела {guide_section}")
+    except Exception as e:
+        # Если не удалось отредактировать, отправляем новое сообщение
+        print(f"DEBUG: Ошибка при редактировании сообщения: {e}")
         try:
-            bot.edit_message_text(
-                chat_id=chat_id,
-                message_id=call.message.message_id,
-                text=guide_content[guide_section],
-                parse_mode="HTML",
-                reply_markup=keyboard,
-                disable_web_page_preview=True,
-            )
-            print(f"Отправлен раздел гида: {guide_section}")
-        except Exception as e:
-            print(f"Ошибка при отправке раздела гида: {e}")
-            # Если редактирование не сработало, отправляем новое сообщение
+            # Удаляем старое сообщение, если возможно
+            bot.delete_message(chat_id, call.message.message_id)
+        except Exception as delete_error:
+            print(f"DEBUG: Не удалось удалить старое сообщение: {delete_error}")
+
+        # Отправляем новое сообщение
+        print(f"DEBUG: Отправляю новое сообщение для раздела {guide_section}")
         bot.send_message(
             chat_id=chat_id,
             text=guide_content[guide_section],
@@ -2927,12 +2959,12 @@ def handle_guide_sections(call):
             reply_markup=keyboard,
             disable_web_page_preview=True,
         )
-    bot.answer_callback_query(call.id)
 
 
 # Run the bot
 if __name__ == "__main__":
-    create_tables()
+    # create_tables()
+
     print("🚀 ===============================================")
     print("🚀 Quickxa Bot - Инициализация...")
     print("🚀 ===============================================")

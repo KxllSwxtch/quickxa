@@ -1210,10 +1210,10 @@ def set_bot_commands():
     # Публичные команды для обычных пользователей
     commands.extend(
         [
-        types.BotCommand("start", "Запустить бота"),
-        types.BotCommand("exchange_rates", "Курсы валют USD/RUB"),
-        types.BotCommand("my_cars", "Мои сохранённые автомобили"),
-        types.BotCommand("orders", "Мои заказы"),
+            types.BotCommand("start", "Запустить бота"),
+            types.BotCommand("exchange_rates", "Курсы валют USD/RUB"),
+            types.BotCommand("my_cars", "Мои сохранённые автомобили"),
+            types.BotCommand("orders", "Мои заказы"),
         ]
     )
 
@@ -1787,9 +1787,7 @@ def calculate_cost(link, message):
         broker_fee = 85000.00  # Брокерские услуги (СВХ + СБКТС + лаборатория + перегон)
 
         # Расчет стоимости доставки
-        delivery_fee = (
-            850.00 if car_type == 'SUV' else 750.00
-        )  # в долларах
+        delivery_fee = 850.00 if car_type == "SUV" else 750.00  # в долларах
         delivery_fee_rub = delivery_fee * usd_to_rub_rate  # конвертация в рубли
 
         # Расчет стоимости услуги дилера/аукциона
@@ -1858,32 +1856,32 @@ def calculate_cost(link, message):
         if message.from_user.id in MANAGERS:
             # Полное сообщение для менеджеров
             result_message = (
-                    f"🏎 {car_title}\n\n"
-                    f"◾️ Возраст: {age_formatted} (дата регистрации: {month}/{year})\n"
-                    f"🛣 Пробег: {formatted_mileage}\n"
-                    f"🔧 Объём двигателя: {engine_volume_formatted}\n"
-                    f"🛞 КПП: {formatted_transmission}\n\n"
-                    f"💰 СТОИМОСТЬ АВТОМОБИЛЯ\n"
-                    f"• Цена авто: ₩{format_number(price_krw)}\n"
-                    f"• Услуги дилера/аукциона: ₩{format_number(dealer_fee_krw)}\n"
-                    f"• Оформление, снятие с учёта + перевозка по Корее: ₩300,000\n\n"
-                    f"⛴️ ДОСТАВКА\n"
-                    f"• До Владивостока (Ro-Ro): ${('850' if car_type == 'SUV' else '750')}\n\n"
-                    f"💵 К ОПЛАТЕ ПО ИНВОЙСУ\n"
-                    f"• В вонах: ₩{format_number(price_krw + dealer_fee_krw + (delivery_fee_usd * usd_to_krw_rate))}\n"
-                    f"• В долларах: ${format_number(price_usd + dealer_fee_usd + delivery_fee_usd)}\n"
-                    f"• В рублях: {format_number(price_rub + dealer_fee_rub + kr_documentation_fee_rub + delivery_fee_rub)} ₽\n\n"
-                    f"♻️Стоимость  услуг в РФ\n"
-                    f"🛃 Таможенные платежи (РФ)\n"
-                    f"• Таможенная пошлина: {format_number(customs_duty)} ₽\n"
-                    f"• Таможенные сборы: {format_number(customs_fee)} ₽\n"
-                    f"• Утилизационный сбор: {format_number(recycling_fee)} ₽\n\n"
-                    f"💼 БРОКЕРСКИЕ УСЛУГИ\n"
-                    f"• СВХ + СБКТС + лаборатория + перегон: 85,000 ₽\n\n"
-                    f"💰 ИТОГОВАЯ СТОИМОСТЬ\n"
-                    f"• Во Владивостоке: {format_number(total_cost_vladivostok)} ₽\n\n"
+                f"🏎 {car_title}\n\n"
+                f"◾️ Возраст: {age_formatted} (дата регистрации: {month}/{year})\n"
+                f"🛣 Пробег: {formatted_mileage}\n"
+                f"🔧 Объём двигателя: {engine_volume_formatted}\n"
+                f"🛞 КПП: {formatted_transmission}\n\n"
+                f"💰 СТОИМОСТЬ АВТОМОБИЛЯ\n"
+                f"• Цена авто: ₩{format_number(price_krw)}\n"
+                f"• Услуги дилера/аукциона: ₩{format_number(dealer_fee_krw)}\n"
+                f"• Оформление, снятие с учёта + перевозка по Корее: ₩300,000\n\n"
+                f"⛴️ ДОСТАВКА\n"
+                f"• До Владивостока (Ro-Ro): ${('850' if car_type == 'SUV' else '750')}\n\n"
+                f"💵 К ОПЛАТЕ ПО ИНВОЙСУ\n"
+                f"• В вонах: ₩{format_number(price_krw + dealer_fee_krw + (delivery_fee_usd * usd_to_krw_rate))}\n"
+                f"• В долларах: ${format_number(price_usd + dealer_fee_usd + delivery_fee_usd)}\n"
+                f"• В рублях: {format_number(price_rub + dealer_fee_rub + kr_documentation_fee_rub + delivery_fee_rub)} ₽\n\n"
+                f"♻️Стоимость  услуг в РФ\n"
+                f"🛃 Таможенные платежи (РФ)\n"
+                f"• Таможенная пошлина: {format_number(customs_duty)} ₽\n"
+                f"• Таможенные сборы: {format_number(customs_fee)} ₽\n"
+                f"• Утилизационный сбор: {format_number(recycling_fee)} ₽\n\n"
+                f"💼 БРОКЕРСКИЕ УСЛУГИ\n"
+                f"• СВХ + СБКТС + лаборатория + перегон: 85,000 ₽\n\n"
+                f"💰 ИТОГОВАЯ СТОИМОСТЬ\n"
+                f"• Во Владивостоке: {format_number(total_cost_vladivostok)} ₽\n\n"
                 f"🔗 <a href='{preview_link}'>Ссылка на автомобиль</a>\n\n"
-                )
+            )
         else:
             # Упрощённое сообщение для клиентов (только информация об автомобиле и стоимость)
             result_message = (
@@ -1898,7 +1896,7 @@ def calculate_cost(link, message):
                 f"📱 +82-10-7626-1999\n"
                 f"📱 +82-10-7934-6603\n"
                 f"📢 <a href='https://t.me/HYT_Trading'>Официальный телеграм канал</a>"
-        )
+            )
 
         # Клавиатура с дальнейшими действиями
         keyboard = types.InlineKeyboardMarkup()
@@ -1999,7 +1997,7 @@ def calculate_cost(link, message):
                 message.chat.id,
                 "🔥 Хотите узнать точную стоимость и получить персональное предложение? Оставьте заявку прямо сейчас и наши специалисты подготовят для вас детальный расчёт со всеми скидками!",
                 reply_markup=request_keyboard,
-        )
+            )
 
         bot.delete_message(
             message.chat.id, processing_message.message_id
@@ -2754,7 +2752,7 @@ def show_acquisition_guide_menu(chat_id):
         keyboard.add(button)
 
     print(f"\n=== DEBUG: Отправляю сообщение с меню для chat_id={chat_id} ===\n")
-        bot.send_message(
+    bot.send_message(
         chat_id,
         "📚 <b>ГИД ПО ПРИОБРЕТЕНИЮ АВТОМОБИЛЯ</b>\n\nВыберите интересующий вас раздел:",
         parse_mode="HTML",

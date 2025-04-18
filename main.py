@@ -1311,7 +1311,7 @@ def get_usd_to_rub_rate():
 
         # Получаем курс USD → RUB из ЦБ РФ
         usd_to_rub = data["Valute"]["USD"]["Value"]
-        usd_to_rub_rate = usd_to_rub
+        usd_to_rub_rate = usd_to_rub + 1.20
 
         print(f"Курс USD → RUB: {usd_to_rub_rate}")
     except requests.RequestException as e:

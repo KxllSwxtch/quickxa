@@ -1560,7 +1560,7 @@ def get_car_info(url):
                             car_fuel = value_text
                         elif header_text == "배기량":  # Объем двигателя
                             car_engine_displacement = value_text
-                        elif header_text == "차종토":
+                        elif header_text == "차종토" or header_text == "차종":
                             car_type = value_text
             else:
                 print("❌ Таблица информации не найдена")

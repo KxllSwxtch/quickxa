@@ -1183,11 +1183,11 @@ def check_subscription(call):
     user_id = call.from_user.id
 
     # Всегда считаем пользователя подписанным
-        bot.answer_callback_query(
-            call.id, "✅ Подписка оформлена! Вы можете продолжить расчёты."
-        )
-        # Установить подписку для пользователя в БД
-        update_user_subscription(user_id, True)
+    bot.answer_callback_query(
+        call.id, "✅ Подписка оформлена! Вы можете продолжить расчёты."
+    )
+    # Установить подписку для пользователя в БД
+    update_user_subscription(user_id, True)
 
 
 def is_user_subscribed(user_id):
@@ -1208,14 +1208,14 @@ def set_bot_commands():
     commands = []
 
     # Публичные команды для обычных пользователей
-        commands.extend(
-            [
-            types.BotCommand("start", "Запустить бота"),
-            types.BotCommand("exchange_rates", "Курсы валют USD/RUB"),
-            types.BotCommand("my_cars", "Мои сохранённые автомобили"),
-            types.BotCommand("orders", "Мои заказы"),
-            ]
-        )
+    commands.extend(
+        [
+        types.BotCommand("start", "Запустить бота"),
+        types.BotCommand("exchange_rates", "Курсы валют USD/RUB"),
+        types.BotCommand("my_cars", "Мои сохранённые автомобили"),
+        types.BotCommand("orders", "Мои заказы"),
+        ]
+    )
 
     bot.set_my_commands(commands)
 
@@ -1273,7 +1273,7 @@ def get_usd_to_krw_rate():
 
                         # Удаляем запятые и конвертируем в float
                         usd_to_krw = float(rate_text.replace(",", ""))
-        usd_to_krw_rate = usd_to_krw
+                        usd_to_krw_rate = usd_to_krw
 
                         print(f"Курс USD → KRW: {usd_to_krw_rate}")
                     else:

@@ -1766,6 +1766,8 @@ def calculate_cost(link, message):
             )
         )
 
+        print(f"CAR_TYPE: {car_type}")
+
         # Конвертируем стоимость авто в рубли
         price_krw = int(car_price) * 10000
         price_usd = price_krw / usd_to_krw_rate

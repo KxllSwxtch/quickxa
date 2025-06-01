@@ -1254,7 +1254,7 @@ def get_usd_to_krw_rate():
         target_div = soup.select_one("div#targetTable")
 
         if target_div:
-            # Находим таблицу с классом tType01 s7 внутри этого div
+            # Находим таблицу с классами tType01 и s7
             table = target_div.select_one("table.tType01.s7")
 
             if table:
@@ -1267,9 +1267,9 @@ def get_usd_to_krw_rate():
                     # Находим все ячейки с классом tRight в этой строке
                     cells = first_row.select("td.tRight")
 
-                    if len(cells) >= 6:  # Проверяем, что есть хотя бы 6 ячеек
-                        # 6-й элемент (индекс 5) содержит курс "송금 받으실 때" (при получении денег)
-                        rate_text = cells[3].text.strip()
+                    if len(cells) >= 3:
+                        # Берем третью ячейку (индекс 2) - это "매매기준율" (базовый курс)
+                        rate_text = cells[2].text.strip()
 
                         # Удаляем запятые и конвертируем в float
                         usd_to_krw = float(rate_text.replace(",", ""))
@@ -1280,23 +1280,23 @@ def get_usd_to_krw_rate():
                         print(
                             f"Не удалось найти нужные ячейки в таблице. Найдено ячеек: {len(cells)}"
                         )
-                        usd_to_krw_rate = None
+                        usd_to_krw_rate = 1400.0  # Значение по умолчанию
                 else:
                     print("Не удалось найти строки в таблице")
-                    usd_to_krw_rate = None
+                    usd_to_krw_rate = 1400.0  # Значение по умолчанию
             else:
                 print("Не удалось найти таблицу с классом tType01 s7 в div#targetTable")
-                usd_to_krw_rate = None
+                usd_to_krw_rate = 1400.0  # Значение по умолчанию
         else:
             print("Не удалось найти div с id='targetTable'")
-            usd_to_krw_rate = None
+            usd_to_krw_rate = 1400.0  # Значение по умолчанию
 
     except requests.RequestException as e:
         print(f"Ошибка при получении курса USD → KRW: {e}")
-        usd_to_krw_rate = None
+        usd_to_krw_rate = 1400.0  # Значение по умолчанию
     except Exception as e:
         print(f"Ошибка при парсинге курса USD → KRW: {e}")
-        usd_to_krw_rate = None
+        usd_to_krw_rate = 1400.0  # Значение по умолчанию
 
 
 def get_usd_to_rub_rate():
@@ -1316,7 +1316,10 @@ def get_usd_to_rub_rate():
         print(f"Курс USD → RUB: {usd_to_rub_rate}")
     except requests.RequestException as e:
         print(f"Ошибка при получении курса USD → RUB: {e}")
-        usd_to_rub_rate = None
+        usd_to_rub_rate = 95.0  # Значение по умолчанию
+    except Exception as e:
+        print(f"Ошибка при парсинге курса USD → RUB: {e}")
+        usd_to_rub_rate = 95.0  # Значение по умолчанию
 
 
 def get_currency_rates():
@@ -1329,6 +1332,15 @@ def get_currency_rates():
 
     # Получаем курс USD → RUB
     get_usd_to_rub_rate()
+
+    # Проверяем, что курсы получены корректно
+    if usd_to_krw_rate is None:
+        usd_to_krw_rate = 1400.0  # Значение по умолчанию
+        print("⚠️ Используется курс USD→KRW по умолчанию")
+
+    if usd_to_rub_rate is None:
+        usd_to_rub_rate = 95.0  # Значение по умолчанию
+        print("⚠️ Используется курс USD→RUB по умолчанию")
 
     rates_text = (
         f"USD → KRW: <b>{usd_to_krw_rate:.2f} ₩</b>\n"
@@ -1393,14 +1405,18 @@ def send_welcome(message):
         "Выберите действие из меню ниже."
     )
 
-    # Логотип компании
-    logo_url = "https://res.cloudinary.com/dt0nkqowc/image/upload/v1744621411/Quicxa/logo_geajtn.png"
-
-    # Отправляем логотип перед сообщением
-    bot.send_photo(
-        message.chat.id,
-        photo=logo_url,
-    )
+    # Отправляем логотип компании (если файл существует)
+    try:
+        with open("logo.jpeg", "rb") as logo_file:
+            bot.send_photo(
+                message.chat.id,
+                photo=logo_file,
+            )
+    except FileNotFoundError:
+        # Если файл не найден, просто пропускаем отправку логотипа
+        print("⚠️ Файл logo.jpeg не найден, пропускаем отправку логотипа")
+    except Exception as e:
+        print(f"⚠️ Ошибка при отправке логотипа: {e}")
 
     # Добавляем пользователя в базу данных
     add_user(

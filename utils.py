@@ -128,7 +128,13 @@ def get_customs_fees(engine_volume, car_price, car_year, car_month, engine_type=
 
 def clean_number(value):
     """Очищает строку от пробелов и преобразует в число"""
-    return int(float(value.replace(" ", "").replace(",", ".")))
+    if isinstance(value, (int, float)):
+        return int(value)
+    try:
+        return int(float(str(value).replace(" ", "").replace(",", ".")))
+    except Exception as e:
+        print(f"[clean_number] Ошибка: {e}, value={value}")
+        return 0  # или другое значение по умолчанию
 
 
 def generate_encar_photo_url(photo_path):

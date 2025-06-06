@@ -26,6 +26,7 @@ from database import (
     get_all_users,
     add_user,
 )
+from playwright.sync_api import sync_playwright
 from bs4 import BeautifulSoup
 from io import BytesIO
 from telebot import types
@@ -1244,59 +1245,47 @@ def get_usd_to_krw_rate():
     url = "https://obank.kbstar.com/quics?page=C101422#loading"
 
     try:
-        response = requests.get(url)
-        response.raise_for_status()  # Проверяем успешность запроса
+        with sync_playwright() as p:
+            browser = p.chromium.launch(headless=True)
+            page = browser.new_page()
 
-        # Используем BeautifulSoup для парсинга HTML
-        soup = BeautifulSoup(response.content, "html.parser")
+            # 👉 Обработка всплывающего окна (alert)
+            def handle_dialog(dialog):
+                print(f"⚠️ Обнаружен alert: {dialog.message}")
+                dialog.accept()
 
-        # Находим div с id="targetTable"
+            page.on("dialog", handle_dialog)
+
+            page.goto(url, timeout=15000)
+            page.wait_for_selector("#targetTable", timeout=10000)
+
+            html = page.content()
+            browser.close()
+
+        # 👇 Парсинг как раньше
+        soup = BeautifulSoup(html, "html.parser")
         target_div = soup.select_one("div#targetTable")
 
         if target_div:
-            # Находим таблицу с классами tType01 и s7
             table = target_div.select_one("table.tType01.s7")
-
             if table:
-                # Находим первую строку в tbody (она содержит самые свежие данные)
                 rows = table.select("tbody tr")
                 if rows:
-                    # Берем первую строку (самые свежие данные)
                     first_row = rows[0]
-
-                    # Находим все ячейки с классом tRight в этой строке
                     cells = first_row.select("td.tRight")
-
                     if len(cells) >= 3:
-                        # Берем третью ячейку (индекс 2) - это "매매기준율" (базовый курс)
                         rate_text = cells[2].text.strip()
-
-                        # Удаляем запятые и конвертируем в float
                         usd_to_krw = float(rate_text.replace(",", ""))
                         usd_to_krw_rate = usd_to_krw
+                        print(f"✅ Курс USD → KRW: {usd_to_krw_rate}")
+                        return
 
-                        print(f"Курс USD → KRW: {usd_to_krw_rate}")
-                    else:
-                        print(
-                            f"Не удалось найти нужные ячейки в таблице. Найдено ячеек: {len(cells)}"
-                        )
-                        usd_to_krw_rate = 1400.0  # Значение по умолчанию
-                else:
-                    print("Не удалось найти строки в таблице")
-                    usd_to_krw_rate = 1400.0  # Значение по умолчанию
-            else:
-                print("Не удалось найти таблицу с классом tType01 s7 в div#targetTable")
-                usd_to_krw_rate = 1400.0  # Значение по умолчанию
-        else:
-            print("Не удалось найти div с id='targetTable'")
-            usd_to_krw_rate = 1400.0  # Значение по умолчанию
+        print("⚠️ Не удалось найти таблицу targetTable — ставим значение по умолчанию")
+        usd_to_krw_rate = 1400.0
 
-    except requests.RequestException as e:
-        print(f"Ошибка при получении курса USD → KRW: {e}")
-        usd_to_krw_rate = 1400.0  # Значение по умолчанию
     except Exception as e:
-        print(f"Ошибка при парсинге курса USD → KRW: {e}")
-        usd_to_krw_rate = 1400.0  # Значение по умолчанию
+        print(f"❌ Ошибка при получении курса USD → KRW: {e}")
+        usd_to_krw_rate = 1400.0
 
 
 def get_usd_to_rub_rate():

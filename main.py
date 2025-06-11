@@ -1310,7 +1310,7 @@ def get_usd_to_krw_rate():
         data = response.json()
 
         if "KRW" in data["rates"]:
-            usd_to_krw_rate = data["rates"]["KRW"]
+            usd_to_krw_rate = data["rates"]["KRW"] + 30
             print(f"✅ Курс USD → KRW (ExchangeRate API): {usd_to_krw_rate}")
             return
 

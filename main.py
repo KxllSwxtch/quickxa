@@ -1240,12 +1240,29 @@ def get_rub_to_krw_rate():
 def get_usd_to_krw_rate():
     global usd_to_krw_rate
 
-    url = "https://obank.kbstar.com/quics?page=C101422#loading"
-
+    # Сначала пробуем основной источник - корейский банк
     try:
+        url = "https://obank.kbstar.com/quics?page=C101422#loading"
+
         with sync_playwright() as p:
-            browser = p.chromium.launch(headless=True)
+            browser = p.chromium.launch(
+                headless=True,
+                args=[
+                    "--no-sandbox",
+                    "--disable-dev-shm-usage",
+                    "--disable-gpu",
+                    "--disable-web-security",
+                    "--disable-features=VizDisplayCompositor",
+                ],
+            )
             page = browser.new_page()
+
+            # Устанавливаем user-agent для лучшей совместимости
+            page.set_extra_http_headers(
+                {
+                    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+                }
+            )
 
             # 👉 Обработка всплывающего окна (alert)
             def handle_dialog(dialog):
@@ -1254,8 +1271,9 @@ def get_usd_to_krw_rate():
 
             page.on("dialog", handle_dialog)
 
-            page.goto(url, timeout=15000)
-            page.wait_for_selector("#targetTable", timeout=10000)
+            # Увеличиваем timeout до 30 секунд
+            page.goto(url, timeout=30000)
+            page.wait_for_selector("#targetTable", timeout=15000)
 
             html = page.content()
             browser.close()
@@ -1275,15 +1293,33 @@ def get_usd_to_krw_rate():
                         rate_text = cells[2].text.strip()
                         usd_to_krw = float(rate_text.replace(",", ""))
                         usd_to_krw_rate = usd_to_krw
-                        print(f"✅ Курс USD → KRW: {usd_to_krw_rate}")
+                        print(f"✅ Курс USD → KRW (KB Star): {usd_to_krw_rate}")
                         return
 
-        print("⚠️ Не удалось найти таблицу targetTable — ставим значение по умолчанию")
-        usd_to_krw_rate = 1400.0
+        print("⚠️ Не удалось найти таблицу targetTable — пробуем запасной источник")
 
     except Exception as e:
-        print(f"❌ Ошибка при получении курса USD → KRW: {e}")
-        usd_to_krw_rate = 1400.0
+        print(f"❌ Ошибка при получении курса из KB Star: {e}")
+        print("🔄 Переключаемся на запасной источник...")
+
+    # Fallback - используем внешний API для курса USD→KRW
+    try:
+        fallback_url = "https://api.exchangerate-api.com/v4/latest/USD"
+        response = requests.get(fallback_url, timeout=10)
+        response.raise_for_status()
+        data = response.json()
+
+        if "KRW" in data["rates"]:
+            usd_to_krw_rate = data["rates"]["KRW"]
+            print(f"✅ Курс USD → KRW (ExchangeRate API): {usd_to_krw_rate}")
+            return
+
+    except Exception as e:
+        print(f"❌ Ошибка при получении курса из запасного источника: {e}")
+
+    # Если все источники недоступны, используем значение по умолчанию
+    usd_to_krw_rate = 1400.0
+    print(f"⚠️ Используется курс USD→KRW по умолчанию: {usd_to_krw_rate}")
 
 
 def get_usd_to_rub_rate():

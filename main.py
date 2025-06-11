@@ -600,7 +600,6 @@ def show_favorite_cars(message):
         car_mileage = car["mileage"]
         car_engine_volume = car["engine_volume"]
         car_transmission = car["transmission"]
-        total_cost_usd = car["total_cost_usd"]
         total_cost_krw = car["total_cost_krw"]
         total_cost_rub = car["total_cost_rub"]
 
@@ -610,7 +609,7 @@ def show_favorite_cars(message):
             f"📅 {car_month}/{car_year} | ⚙️ {car_transmission}\n"
             f"🔢 Пробег: {car_mileage} | 🏎 Объём: {format_number(car_engine_volume)} cc\n\n"
             f"Стоимость авто под ключ:\n"
-            f"${format_number(total_cost_usd)} | ₩{format_number(total_cost_krw)} | {format_number(total_cost_rub)} ₽\n\n"
+            f"₩{format_number(total_cost_krw)} | {format_number(total_cost_rub)} ₽\n\n"
             f"📌 *Статус:* {car_status}\n\n"
             f"[🔗 Ссылка на автомобиль]({car_link})\n\n"
             f"Консультация с менеджерами:\n\n"
@@ -1212,7 +1211,6 @@ def set_bot_commands():
     commands.extend(
         [
             types.BotCommand("start", "Запустить бота"),
-            types.BotCommand("exchange_rates", "Курсы валют USD/RUB"),
             types.BotCommand("my_cars", "Мои сохранённые автомобили"),
             types.BotCommand("orders", "Мои заказы"),
         ]
@@ -1874,10 +1872,9 @@ def calculate_cost(link, message):
                 f"• Цена авто: ₩{format_number(price_krw)}\n"
                 f"• Услуги дилера/аукциона: ₩{format_number(dealer_fee_krw)}\n"
                 f"• Оформление, снятие с учёта + перевозка по Корее: ₩300,000\n\n"
-                f"• Доставка Ro-Ro: ${('850' if car_type == 'SUV' else '750')}\n\n"
+                f"• Доставка Ro-Ro до Владивостока: ₩{format_number(delivery_fee_usd * usd_to_krw_rate)}\n\n"
                 f"💰 Итого по Корее в инвойс:\n"
                 f"• В вонах: ₩{format_number(price_krw + dealer_fee_krw + kr_documentation_fee_krw + (delivery_fee_usd * usd_to_krw_rate))}\n"
-                f"• В долларах: ${format_number(price_usd + dealer_fee_usd + kr_documentation_fee_usd + delivery_fee_usd)}\n"
                 f"• В рублях: {format_number(price_rub + dealer_fee_rub + kr_documentation_fee_rub + delivery_fee_rub)} ₽\n\n"
                 f"🇷🇺 Расходы в России:\n"
                 # f"♻️Стоимость  услуг в РФ\n"
@@ -2188,18 +2185,18 @@ def handle_callback_query(call):
 
         detail_message = (
             f"<i>ПЕРВАЯ ЧАСТЬ ОПЛАТЫ (КОРЕЯ)</i>:\n\n"
-            f"Стоимость автомобиля:\n<b>${format_number(car_data['car_price_usd'])}</b> | <b>₩{format_number(car_data['car_price_krw'])}</b> | <b>{format_number(car_data['car_price_rub'])} ₽</b>\n\n"
-            f"Услуги фирмы (поиск и подбор авто, документация, 3 осмотра):\n<b>${format_number(car_data['company_fees_usd'])}</b> | <b>₩{format_number(car_data['company_fees_krw'])}</b> | <b>{format_number(car_data['company_fees_rub'])} ₽</b>\n\n"
-            f"Фрахт (отправка в порт, доставка автомобиля на базу, оплата судна):\n<b>${format_number(car_data['freight_korea_usd'])}</b> | <b>₩{format_number(car_data['freight_korea_krw'])}</b> | <b>{format_number(car_data['freight_korea_rub'])} ₽</b>\n\n\n"
-            f"Дилерский сбор:\n<b>${format_number(car_data['dealer_korea_usd'])}</b> | <b>₩{format_number(car_data['dealer_korea_krw'])}</b> | <b>{format_number(car_data['dealer_korea_rub'])} ₽</b>\n\n"
+            f"Стоимость автомобиля:\n<b>₩{format_number(car_data['car_price_krw'])}</b> | <b>{format_number(car_data['car_price_rub'])} ₽</b>\n\n"
+            f"Услуги фирмы (поиск и подбор авто, документация, 3 осмотра):\n<b>₩{format_number(car_data['company_fees_krw'])}</b> | <b>{format_number(car_data['company_fees_rub'])} ₽</b>\n\n"
+            f"Фрахт (отправка в порт, доставка автомобиля на базу, оплата судна):\n<b>₩{format_number(car_data['freight_korea_krw'])}</b> | <b>{format_number(car_data['freight_korea_rub'])} ₽</b>\n\n\n"
+            f"Дилерский сбор:\n<b>₩{format_number(car_data['dealer_korea_krw'])}</b> | <b>{format_number(car_data['dealer_korea_rub'])} ₽</b>\n\n"
             f"<i>ВТОРАЯ ЧАСТЬ ОПЛАТЫ (РОССИЯ)</i>:\n\n"
-            f"Брокер-Владивосток:\n<b>${format_number(car_data['broker_russia_usd'])}</b> | <b>₩{format_number(car_data['broker_russia_krw'])}</b> | <b>{format_number(car_data['broker_russia_rub'])} ₽</b>\n\n\n"
-            f"Единая таможенная ставка:\n<b>${format_number(car_data['customs_duty_usd'])}</b> | <b>₩{format_number(car_data['customs_duty_krw'])}</b> | <b>{format_number(car_data['customs_duty_rub'])} ₽</b>\n\n"
-            f"Таможенное оформление:\n<b>${format_number(car_data['customs_fee_usd'])}</b> | <b>₩{format_number(car_data['customs_fee_krw'])}</b> | <b>{format_number(car_data['customs_fee_rub'])} ₽</b>\n\n"
-            f"Утилизационный сбор:\n<b>${format_number(car_data['util_fee_usd'])}</b> | <b>₩{format_number(car_data['util_fee_krw'])}</b> | <b>{format_number(car_data['util_fee_rub'])} ₽</b>\n\n\n"
-            f"Перегон во Владивостоке:\n<b>${format_number(car_data['vladivostok_transfer_usd'])}</b> | <b>₩{format_number(car_data['vladivostok_transfer_krw'])}</b> | <b>{format_number(car_data['vladivostok_transfer_rub'])} ₽</b>\n\n"
-            f"Автовоз до Москвы:\n<b>${format_number(car_data['moscow_transporter_usd'])}</b> | <b>₩{format_number(car_data['moscow_transporter_krw'])}</b> | <b>{format_number(car_data['moscow_transporter_rub'])} ₽</b>\n\n"
-            f"Итого под ключ: \n<b>${format_number(car_data['total_cost_usd'])}</b> | <b>₩{format_number(car_data['total_cost_krw'])}</b> | <b>{format_number(car_data['total_cost_rub'])} ₽</b>\n\n"
+            f"Брокер-Владивосток:\n<b>₩{format_number(car_data['broker_russia_krw'])}</b> | <b>{format_number(car_data['broker_russia_rub'])} ₽</b>\n\n\n"
+            f"Единая таможенная ставка:\n<b>₩{format_number(car_data['customs_duty_krw'])}</b> | <b>{format_number(car_data['customs_duty_rub'])} ₽</b>\n\n"
+            f"Таможенное оформление:\n<b>₩{format_number(car_data['customs_fee_krw'])}</b> | <b>{format_number(car_data['customs_fee_rub'])} ₽</b>\n\n"
+            f"Утилизационный сбор:\n<b>₩{format_number(car_data['util_fee_krw'])}</b> | <b>{format_number(car_data['util_fee_rub'])} ₽</b>\n\n\n"
+            f"Перегон во Владивостоке:\n<b>₩{format_number(car_data['vladivostok_transfer_krw'])}</b> | <b>{format_number(car_data['vladivostok_transfer_rub'])} ₽</b>\n\n"
+            f"Автовоз до Москвы:\n<b>₩{format_number(car_data['moscow_transporter_krw'])}</b> | <b>{format_number(car_data['moscow_transporter_rub'])} ₽</b>\n\n"
+            f"Итого под ключ: \n<b>₩{format_number(car_data['total_cost_krw'])}</b> | <b>{format_number(car_data['total_cost_rub'])} ₽</b>\n\n"
             f"<b>Доставку до вашего города уточняйте у менеджеров:</b>\n"
             # f"▪️ +82 10-5128-8082 (Александр)\n\n"
             f"▪️ +82-10-7934-6603\n"
@@ -2575,10 +2572,9 @@ def process_car_price(message):
             f"• Услуги дилера/аукциона: ₩{format_number(dealer_fee_krw)}\n"
             f"• Оформление, снятие с учёта + перевозка по Корее: ₩300,000\n\n"
             f"⛴️ ДОСТАВКА\n"
-            f"• До Владивостока (Ro-Ro): ${('850' if car_type == 'SUV' else '750')}\n\n"
+            f"• До Владивостока (Ro-Ro): ₩{format_number(delivery_fee_usd * usd_to_krw_rate)}\n\n"
             f"💵 К ОПЛАТЕ ПО ИНВОЙСУ\n"
             f"• В вонах: ₩{format_number(car_price_krw + dealer_fee_krw + kr_documentation_fee_krw + (delivery_fee_usd * usd_to_krw_rate))}\n"
-            f"• В долларах: ${format_number(price_usd + dealer_fee_usd + kr_documentation_fee_usd + delivery_fee_usd)}\n"
             f"• В рублях: {format_number(price_rub + dealer_fee_rub + kr_documentation_fee_rub + delivery_fee_rub)} ₽\n\n"
             f"♻️Стоимость услуг в РФ\n"
             f"🛃 Таможенные платежи (РФ)\n"
@@ -2843,7 +2839,7 @@ def handle_guide_sections(call):
 • Реквизиты нашей компании (счёт, SWIFT-код)
 • Инвойс на английском языке
 
-Перевод возможен в долларах США или корейских вонах через банки, работающие с международными переводами (например: МТС Банк, Газпромбанк, ОТП Банк и др.).""",
+Перевод возможен в корейских вонах через банки, работающие с международными переводами (например: МТС Банк, Газпромбанк, ОТП Банк и др.).""",
         "guide_delivery_time": """<b>3. Сроки доставки</b>
 
 <b>Общий срок от выкупа до прибытия во Владивосток:</b>

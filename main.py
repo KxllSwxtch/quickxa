@@ -1980,30 +1980,6 @@ def calculate_cost(link, message):
             )
         )
 
-        # Отправляем до 10 фотографий
-        media_group = []
-        for photo_url in sorted(car_photos):
-            try:
-                response = requests.get(photo_url)
-                if response.status_code == 200:
-                    photo = BytesIO(response.content)  # Загружаем фото в память
-                    media_group.append(
-                        types.InputMediaPhoto(photo)
-                    )  # Добавляем в список
-
-                    # Если набрали 10 фото, отправляем альбом
-                    if len(media_group) == 10:
-                        bot.send_media_group(message.chat.id, media_group)
-                        media_group.clear()  # Очищаем список для следующей группы
-                else:
-                    print(f"Ошибка загрузки фото: {photo_url} - {response.status_code}")
-            except Exception as e:
-                print(f"Ошибка при обработке фото {photo_url}: {e}")
-
-        # Отправка оставшихся фото, если их меньше 10
-        if media_group:
-            bot.send_media_group(message.chat.id, media_group)
-
         car_data["car_id"] = car_id
         car_data["name"] = car_title
         car_data["images"] = car_photos if isinstance(car_photos, list) else []

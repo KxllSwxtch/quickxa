@@ -1289,8 +1289,8 @@ def get_usd_to_krw_rate():
                 if rows:
                     first_row = rows[0]
                     cells = first_row.select("td.tRight")
-                    if len(cells) >= 3:
-                        rate_text = cells[2].text.strip()
+                    if len(cells) >= 4:
+                        rate_text = cells[3].text.strip()
                         usd_to_krw = float(rate_text.replace(",", ""))
                         usd_to_krw_rate = usd_to_krw
                         print(f"✅ Курс USD → KRW (KB Star): {usd_to_krw_rate}")
@@ -1310,7 +1310,7 @@ def get_usd_to_krw_rate():
         data = response.json()
 
         if "KRW" in data["rates"]:
-            usd_to_krw_rate = data["rates"]["KRW"] + 30
+            usd_to_krw_rate = data["rates"]["KRW"]
             print(f"✅ Курс USD → KRW (ExchangeRate API): {usd_to_krw_rate}")
             return
 

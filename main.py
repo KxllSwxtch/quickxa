@@ -26,7 +26,6 @@ from database import (
     get_all_users,
     add_user,
 )
-from playwright.sync_api import sync_playwright
 from bs4 import BeautifulSoup
 from io import BytesIO
 from telebot import types
@@ -1240,66 +1239,58 @@ def get_rub_to_krw_rate():
 def get_usd_to_krw_rate():
     global usd_to_krw_rate
 
-    # Сначала пробуем основной источник - корейский банк
+    # Сначала пробуем основной источник - NAVER API
     try:
-        url = "https://obank.kbstar.com/quics?page=C101422#loading"
+        headers = {
+            "accept": "application/json, text/javascript, */*; q=0.01",
+            "accept-language": "en,ru;q=0.9,en-CA;q=0.8,la;q=0.7,fr;q=0.6,ko;q=0.5",
+            "origin": "https://search.naver.com",
+            "priority": "u=1, i",
+            "referer": "https://search.naver.com/",
+            "sec-ch-ua": '"Not)A;Brand";v="8", "Chromium";v="138", "Google Chrome";v="138"',
+            "sec-ch-ua-mobile": "?0",
+            "sec-ch-ua-platform": '"macOS"',
+            "sec-fetch-dest": "empty",
+            "sec-fetch-mode": "cors",
+            "sec-fetch-site": "same-site",
+            "user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36",
+        }
 
-        with sync_playwright() as p:
-            browser = p.chromium.launch(
-                headless=True,
-                args=[
-                    "--no-sandbox",
-                    "--disable-dev-shm-usage",
-                    "--disable-gpu",
-                    "--disable-web-security",
-                    "--disable-features=VizDisplayCompositor",
-                ],
-            )
-            page = browser.new_page()
+        params = {
+            "key": "calculator",
+            "pkid": "141",
+            "q": "환율",
+            "where": "m",
+            "u1": "keb",
+            "u6": "receive",
+            "u7": "0",
+            "u3": "USD",
+            "u4": "KRW",
+            "u8": "down",
+            "u2": "1",
+        }
 
-            # Устанавливаем user-agent для лучшей совместимости
-            page.set_extra_http_headers(
-                {
-                    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
-                }
-            )
+        response = requests.get(
+            "https://m.search.naver.com/p/csearch/content/qapirender.nhn",
+            params=params,
+            headers=headers,
+            timeout=10
+        )
+        response.raise_for_status()
+        data = response.json()
 
-            # 👉 Обработка всплывающего окна (alert)
-            def handle_dialog(dialog):
-                print(f"⚠️ Обнаружен alert: {dialog.message}")
-                dialog.accept()
+        # Извлекаем курс из ответа
+        if "country" in data and len(data["country"]) >= 2:
+            rate_text = data["country"][1]["value"]
+            usd_to_krw = float(rate_text.replace(",", ""))
+            usd_to_krw_rate = usd_to_krw
+            print(f"✅ Курс USD → KRW (NAVER): {usd_to_krw_rate}")
+            return
 
-            page.on("dialog", handle_dialog)
-
-            # Увеличиваем timeout до 30 секунд
-            page.goto(url, timeout=30000)
-            page.wait_for_selector("#targetTable", timeout=15000)
-
-            html = page.content()
-            browser.close()
-
-        # 👇 Парсинг как раньше
-        soup = BeautifulSoup(html, "html.parser")
-        target_div = soup.select_one("div#targetTable")
-
-        if target_div:
-            table = target_div.select_one("table.tType01.s7")
-            if table:
-                rows = table.select("tbody tr")
-                if rows:
-                    first_row = rows[0]
-                    cells = first_row.select("td.tRight")
-                    if len(cells) >= 4:
-                        rate_text = cells[3].text.strip()
-                        usd_to_krw = float(rate_text.replace(",", ""))
-                        usd_to_krw_rate = usd_to_krw
-                        print(f"✅ Курс USD → KRW (KB Star): {usd_to_krw_rate}")
-                        return
-
-        print("⚠️ Не удалось найти таблицу targetTable — пробуем запасной источник")
+        print("⚠️ Не удалось извлечь курс из NAVER API — пробуем запасной источник")
 
     except Exception as e:
-        print(f"❌ Ошибка при получении курса из KB Star: {e}")
+        print(f"❌ Ошибка при получении курса из NAVER: {e}")
         print("🔄 Переключаемся на запасной источник...")
 
     # Fallback - используем внешний API для курса USD→KRW

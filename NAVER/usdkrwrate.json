@@ -1,0 +1,17 @@
+{
+  "pkid": 141,
+  "count": 1,
+  "country": [
+    {
+      "value": "1",
+      "subValue": "1 달러",
+      "currencyUnit": "달러"
+    },
+    {
+      "value": "1,377.70",
+      "subValue": "1,377.70 원",
+      "currencyUnit": "원"
+    }
+  ],
+  "calculatorMessage": "송금거래는 별도의 수수료와 전신료가 있습니다."
+}

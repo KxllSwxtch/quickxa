@@ -1,0 +1,17 @@
+{
+  "pkid": 141,
+  "count": 1,
+  "country": [
+    {
+      "value": "1",
+      "subValue": "1 루블",
+      "currencyUnit": "루블"
+    },
+    {
+      "value": "17.85",
+      "subValue": "17.85 원",
+      "currencyUnit": "원"
+    }
+  ],
+  "calculatorMessage": ""
+}

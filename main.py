@@ -1221,18 +1221,56 @@ def set_bot_commands():
 def get_rub_to_krw_rate():
     global rub_to_krw_rate
 
-    url = "https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@latest/v1/currencies/rub.json"
+    headers = {
+        "accept": "application/json, text/javascript, */*; q=0.01",
+        "accept-language": "en,ru;q=0.9,en-CA;q=0.8,la;q=0.7,fr;q=0.6,ko;q=0.5",
+        "origin": "https://search.naver.com",
+        "priority": "u=1, i",
+        "referer": "https://search.naver.com/",
+        "sec-ch-ua": '"Not)A;Brand";v="8", "Chromium";v="138", "Google Chrome";v="138"',
+        "sec-ch-ua-mobile": "?0",
+        "sec-ch-ua-platform": '"macOS"',
+        "sec-fetch-dest": "empty",
+        "sec-fetch-mode": "cors",
+        "sec-fetch-site": "same-site",
+        "user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36",
+    }
+
+    params = {
+        "key": "calculator",
+        "pkid": "141",
+        "q": "환율",
+        "where": "m",
+        "u1": "keb",
+        "u6": "standardUnit",
+        "u7": "0",
+        "u3": "RUB",
+        "u4": "KRW",
+        "u8": "down",
+        "u2": "1",
+    }
 
     try:
-        response = requests.get(url)
-        response.raise_for_status()  # Проверяем, что запрос успешный (код 200)
+        response = requests.get(
+            "https://m.search.naver.com/p/csearch/content/qapirender.nhn",
+            params=params,
+            headers=headers,
+        )
+        response.raise_for_status()
         data = response.json()
-
-        rub_to_krw = data["rub"]["krw"]  # Достаем курс рубля к воне
-        rub_to_krw_rate = rub_to_krw
+        
+        # Extract rate from NAVER response and subtract 0.4
+        if data and "country" in data and len(data["country"]) >= 2:
+            raw_rate = float(data["country"][1]["value"])
+            rub_to_krw_rate = raw_rate - 0.4
+        else:
+            raise ValueError("Invalid response format from NAVER API")
 
     except requests.RequestException as e:
         print(f"Ошибка при получении курса: {e}")
+        return None
+    except (ValueError, KeyError, IndexError) as e:
+        print(f"Ошибка при обработке данных: {e}")
         return None
 
 

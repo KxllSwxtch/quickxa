@@ -1258,7 +1258,7 @@ def get_rub_to_krw_rate():
         )
         response.raise_for_status()
         data = response.json()
-        
+
         # Extract rate from NAVER response and subtract 0.4
         if data and "country" in data and len(data["country"]) >= 2:
             raw_rate = float(data["country"][1]["value"])
@@ -1312,7 +1312,7 @@ def get_usd_to_krw_rate():
             "https://m.search.naver.com/p/csearch/content/qapirender.nhn",
             params=params,
             headers=headers,
-            timeout=10
+            timeout=10,
         )
         response.raise_for_status()
         data = response.json()
@@ -1363,7 +1363,7 @@ def get_usd_to_rub_rate():
 
         # Получаем курс USD → RUB из ЦБ РФ
         usd_to_rub = data["Valute"]["USD"]["Value"]
-        usd_to_rub_rate = usd_to_rub + 2
+        usd_to_rub_rate = usd_to_rub
 
         print(f"Курс USD → RUB: {usd_to_rub_rate}")
     except requests.RequestException as e:

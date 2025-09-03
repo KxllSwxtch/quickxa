@@ -2023,9 +2023,7 @@ def calculate_cost(link, message):
                 f"📊 Расчёт автомобиля: {car_title}\n"
                 f"◾️ Дата регистрации: {month}/{formatted_car_year}\n"
                 f"🛣 Пробег: {formatted_mileage}\n"
-                f"⚙️ Объём двигателя: {engine_volume_formatted}\n"
-                f"📅 Возраст: {age_formatted}\n"
-                f"🚗 Статус: {prokhodnaya_status}\n\n"
+                f"⚙️ Объём двигателя: {engine_volume_formatted}\n\n"
                 f"🇰🇷 Расходы по Корее и логистика:\n"
                 f"• В вонах: ₩{format_number(korea_total_krw)}\n"
                 f"• В рублях: {format_number(korea_total_rub)} ₽\n\n"
@@ -2040,9 +2038,7 @@ def calculate_cost(link, message):
                 f"📊 Расчёт автомобиля: {car_title}\n"
                 f"◾️ Дата регистрации: {month}/{formatted_car_year}\n"
                 f"🛣 Пробег: {formatted_mileage}\n"
-                f"⚙️ Объём двигателя: {engine_volume_formatted}\n"
-                f"📅 Возраст: {age_formatted}\n"
-                f"🚗 Статус: {prokhodnaya_status}\n\n"
+                f"⚙️ Объём двигателя: {engine_volume_formatted}\n\n"
                 f"🇰🇷 Расходы по Корее и логистика:\n"
                 f"• В вонах: ₩{format_number(korea_total_krw)}\n"
                 f"• В рублях: {format_number(korea_total_rub)} ₽\n\n"
@@ -2692,7 +2688,6 @@ def process_car_price(message):
         car_type_formatted = "Кроссовер" if car_type == "SUV" else "Легковой"
 
         result_message = (
-            f"📅 Возраст: {age_display}\n"
             f"🔧 Объём двигателя: {engine_volume} cc\n"
             f"🏎 Тип кузова: {car_type_formatted}\n\n"
             f"💰 СТОИМОСТЬ АВТОМОБИЛЯ\n"
@@ -2733,7 +2728,6 @@ def process_car_price(message):
 
         result_message = (
             f"🏎 Тип кузова: {car_type_formatted}\n"
-            f"◾️ Возраст: {age_display}\n"
             f"🔧 Объём двигателя: {engine_volume} cc\n\n"
             f"💰 Финальная стоимость во Владивостоке на текущий день: {format_number(total_cost_vladivostok)} ₽\n\n"
             f"⚠️ Если данное авто попадает под санкции, уточните возможность отправки у наших менеджеров:\n\n"

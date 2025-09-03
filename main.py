@@ -1216,8 +1216,22 @@ def is_user_subscribed(user_id):
     """Проверяет, подписан ли пользователь на канал."""
     try:
         member = bot.get_chat_member(f"@{CHANNEL_USERNAME}", user_id)
+        print(f"✅ Проверка подписки для пользователя {user_id}: статус = {member.status}")
         return member.status in ['member', 'administrator', 'creator']
-    except:
+    except telebot.apihelper.ApiTelegramException as e:
+        error_message = str(e)
+        print(f"❌ Ошибка проверки подписки для пользователя {user_id}: {error_message}")
+        
+        if "chat not found" in error_message.lower():
+            print(f"⚠️ Канал @{CHANNEL_USERNAME} не найден или бот не имеет доступа")
+        elif "user not found" in error_message.lower():
+            print(f"⚠️ Пользователь {user_id} не найден в канале")
+        elif "bot is not a member" in error_message.lower():
+            print(f"⚠️ Бот не является администратором канала @{CHANNEL_USERNAME}")
+        
+        return False
+    except Exception as e:
+        print(f"❌ Неожиданная ошибка при проверке подписки: {e}")
         return False
 
 
@@ -1935,11 +1949,11 @@ def calculate_cost(link, message):
             + delivery_fee_rub  # доставка паромом
         )
 
-        # Расчет стоимости доставки до Москвы
-        moscow_delivery_fee = 180000.00  # минимальная стоимость доставки до Москвы
+        # Расчет стоимости доставки до Нижнего Новгорода
+        nizhny_novgorod_delivery_fee = 205000.00  # стоимость доставки до Нижнего Новгорода
 
-        # Расчет полной стоимости с доставкой до Москвы
-        total_cost_moscow = total_cost_vladivostok + moscow_delivery_fee
+        # Расчет полной стоимости с доставкой до Нижнего Новгорода
+        total_cost_nizhny = total_cost_vladivostok + nizhny_novgorod_delivery_fee
 
         # Сохраняем все данные в car_data для последующей передачи в детализацию
         car_data = {
@@ -1974,43 +1988,42 @@ def calculate_cost(link, message):
         car_type_formatted = "Кроссовер" if car_type == "SUV" else "Легковой"
 
         # Формирование сообщения результата
+        # Расчет общих сумм для Кореи
+        korea_total_krw = price_krw + dealer_fee_krw + kr_documentation_fee_krw + (delivery_fee_usd * usd_to_krw_rate)
+        korea_total_rub = price_rub + dealer_fee_rub + kr_documentation_fee_rub + delivery_fee_rub
+        
+        # Расчет общих расходов в России
+        russia_total_expenses = customs_duty + customs_fee + recycling_fee + broker_fee
+        
         if message.from_user.id in MANAGERS:
-            # Полное сообщение для менеджеров
+            # Упрощенное сообщение для менеджеров по новому формату
             result_message = (
-                f"📊 Расчёт автомобиля: {car_title}\n\n"
-                f"◾️ Дата регистрации: {month}/{year}\n"
+                f"📊 Расчёт автомобиля: {car_title}\n"
+                f"◾️ Дата регистрации: {month}/{formatted_car_year}\n"
                 f"🛣 Пробег: {formatted_mileage}\n"
-                f"⚙️ Объём двигателя: {engine_volume_formatted}\n"
-                # f"🏎 Тип кузова: {car_type_formatted}\n\n"
+                f"⚙️ Объём двигателя: {engine_volume_formatted}\n\n"
                 f"🇰🇷 Расходы по Корее и логистика:\n"
-                f"• Цена авто: ₩{format_number(price_krw)}\n"
-                f"• Услуги дилера/аукциона: ₩{format_number(dealer_fee_krw)}\n"
-                f"• Оформление, снятие с учёта + перевозка по Корее: ₩300,000\n\n"
-                f"• Доставка Ro-Ro до Владивостока: ₩{format_number(delivery_fee_usd * usd_to_krw_rate)}\n\n"
-                f"💰 Итого по Корее в инвойс:\n"
-                f"• В вонах: ₩{format_number(price_krw + dealer_fee_krw + kr_documentation_fee_krw + (delivery_fee_usd * usd_to_krw_rate))}\n"
-                f"• В рублях: {format_number(price_rub + dealer_fee_rub + kr_documentation_fee_rub + delivery_fee_rub)} ₽\n\n"
-                f"🇷🇺 Расходы в России:\n"
-                # f"♻️Стоимость  услуг в РФ\n"
-                f"🛃 Таможенные платежи (РФ)\n"
-                f"• Таможенная пошлина: {format_number(customs_duty)} ₽\n"
-                f"• Таможенные сборы: {format_number(customs_fee)} ₽\n"
-                f"• Утилизационный сбор: {format_number(recycling_fee)} ₽\n\n"
-                f"💼 БРОКЕРСКИЕ УСЛУГИ\n"
-                f"• СВХ + СБКТС + лаборатория + перегон: 85,000 ₽\n\n"
-                f"💰 Финальная стоимость во Владивостоке на текущий день: {format_number(total_cost_vladivostok)} ₽\n\n"
-                f"🔗 <a href='{preview_link}'>Ссылка на автомобиль</a>\n\n"
+                f"• В вонах: ₩{format_number(korea_total_krw)}\n"
+                f"• В рублях: {format_number(korea_total_rub)} ₽\n\n"
+                f"🇷🇺 Расходы в России: {format_number(russia_total_expenses)} ₽\n"
+                f"• Цена под ключ во Владивостоке: {format_number(total_cost_vladivostok)} ₽\n"
+                f"• Автовоз до Нижнего Новгорода: {format_number(nizhny_novgorod_delivery_fee)} ₽\n\n"
+                f"Ссылка на авто: {preview_link}\n\n"
             )
         else:
-            # Упрощённое сообщение для клиентов (только информация об автомобиле и стоимость)
+            # Упрощённое сообщение для клиентов по новому формату
             result_message = (
-                f"🏎 Модель: {car_title}\n"
-                f"◾️ Год: {formatted_car_year} / {month}\n"
+                f"📊 Расчёт автомобиля: {car_title}\n"
+                f"◾️ Дата регистрации: {month}/{formatted_car_year}\n"
                 f"🛣 Пробег: {formatted_mileage}\n"
-                f"🏎 Тип кузова: {car_type_formatted}\n"
-                f"🔧 Объём двигателя: {engine_volume_formatted}\n\n"
-                f"💰 Финальная стоимость во Владивостоке на текущий день: {format_number(total_cost_vladivostok)} ₽\n\n"
-                f"🔗 <a href='{preview_link}'>Ссылка на автомобиль</a>\n\n"
+                f"⚙️ Объём двигателя: {engine_volume_formatted}\n\n"
+                f"🇰🇷 Расходы по Корее и логистика:\n"
+                f"• В вонах: ₩{format_number(korea_total_krw)}\n"
+                f"• В рублях: {format_number(korea_total_rub)} ₽\n\n"
+                f"🇷🇺 Расходы в России: {format_number(russia_total_expenses)} ₽\n"
+                f"• Цена под ключ во Владивостоке: {format_number(total_cost_vladivostok)} ₽\n"
+                f"• Автовоз до Нижнего Новгорода: {format_number(nizhny_novgorod_delivery_fee)} ₽\n\n"
+                f"Ссылка на авто: {preview_link}\n\n"
                 f"⚠️ Если данное авто попадает под санкции, уточните возможность отправки у наших менеджеров:\n\n"
                 f"📱 +82-10-7626-1999\n"
                 f"📱 +82-10-7934-6603\n"
@@ -2285,7 +2298,7 @@ def handle_callback_query(call):
             f"Таможенное оформление:\n<b>₩{format_number(car_data['customs_fee_krw'])}</b> | <b>{format_number(car_data['customs_fee_rub'])} ₽</b>\n\n"
             f"Утилизационный сбор:\n<b>₩{format_number(car_data['util_fee_krw'])}</b> | <b>{format_number(car_data['util_fee_rub'])} ₽</b>\n\n\n"
             f"Перегон во Владивостоке:\n<b>₩{format_number(car_data['vladivostok_transfer_krw'])}</b> | <b>{format_number(car_data['vladivostok_transfer_rub'])} ₽</b>\n\n"
-            f"Автовоз до Москвы:\n<b>₩{format_number(car_data['moscow_transporter_krw'])}</b> | <b>{format_number(car_data['moscow_transporter_rub'])} ₽</b>\n\n"
+            f"Автовоз до Нижнего Новгорода:\n<b>₩{format_number(car_data['nizhny_novgorod_transporter_krw'])}</b> | <b>{format_number(car_data['nizhny_novgorod_transporter_rub'])} ₽</b>\n\n"
             f"Итого под ключ: \n<b>₩{format_number(car_data['total_cost_krw'])}</b> | <b>{format_number(car_data['total_cost_rub'])} ₽</b>\n\n"
             f"<b>Доставку до вашего города уточняйте у менеджеров:</b>\n"
             # f"▪️ +82 10-5128-8082 (Александр)\n\n"
@@ -2623,11 +2636,11 @@ def process_car_price(message):
         + delivery_fee_rub  # доставка паромом
     )
 
-    # Расчет стоимости доставки до Москвы
-    moscow_delivery_fee = 180000.00  # минимальная стоимость доставки до Москвы
+    # Расчет стоимости доставки до Нижнего Новгорода
+    nizhny_novgorod_delivery_fee = 205000.00  # стоимость доставки до Нижнего Новгорода
 
-    # Расчет полной стоимости с доставкой до Москвы
-    total_cost_moscow = total_cost_vladivostok + moscow_delivery_fee
+    # Расчет полной стоимости с доставкой до Нижнего Новгорода
+    total_cost_nizhny = total_cost_vladivostok + nizhny_novgorod_delivery_fee
 
     # Определяем стоимость доставки в зависимости от типа авто
     delivery_fee_usd = 850 if car_type == "SUV" else 750

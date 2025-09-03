@@ -62,6 +62,7 @@ car_id_external = ""
 total_car_price = 0
 krw_rub_rate = 0
 rub_to_krw_rate = 0
+krw_to_rub_rate = 0  # Direct KRW to RUB conversion rate
 usd_rate = 0
 users = set()
 user_data = {}
@@ -1282,7 +1283,7 @@ def set_bot_commands():
 
 
 def get_rub_to_krw_rate():
-    global rub_to_krw_rate
+    global rub_to_krw_rate, krw_to_rub_rate
 
     headers = {
         "accept": "application/json, text/javascript, */*; q=0.01",
@@ -1290,13 +1291,13 @@ def get_rub_to_krw_rate():
         "origin": "https://search.naver.com",
         "priority": "u=1, i",
         "referer": "https://search.naver.com/",
-        "sec-ch-ua": '"Not)A;Brand";v="8", "Chromium";v="138", "Google Chrome";v="138"',
+        "sec-ch-ua": '"Not;A=Brand";v="99", "Google Chrome";v="139", "Chromium";v="139"',
         "sec-ch-ua-mobile": "?0",
         "sec-ch-ua-platform": '"macOS"',
         "sec-fetch-dest": "empty",
         "sec-fetch-mode": "cors",
         "sec-fetch-site": "same-site",
-        "user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36",
+        "user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36",
     }
 
     params = {
@@ -1326,6 +1327,10 @@ def get_rub_to_krw_rate():
         if data and "country" in data and len(data["country"]) >= 2:
             raw_rate = float(data["country"][1]["value"])
             rub_to_krw_rate = raw_rate - 0.4
+            # Calculate direct KRW to RUB rate for conversions
+            krw_to_rub_rate = 1 / rub_to_krw_rate
+            print(f"Курс RUB → KRW: {rub_to_krw_rate} (с учетом -0.4)")
+            print(f"Курс KRW → RUB: {krw_to_rub_rate}")
         else:
             raise ValueError("Invalid response format from NAVER API")
 
@@ -1736,7 +1741,7 @@ def get_car_info(url):
 
 # Function to calculate the total cost
 def calculate_cost(link, message):
-    global car_data, car_id_external, car_month, car_year, krw_rub_rate, eur_rub_rate, rub_to_krw_rate, usd_rate
+    global car_data, car_id_external, car_month, car_year, krw_rub_rate, eur_rub_rate, rub_to_krw_rate, krw_to_rub_rate, usd_rate
 
     user_id = message.from_user.id
 
@@ -1899,10 +1904,10 @@ def calculate_cost(link, message):
 
         print(f"CAR_TYPE: {car_type}")
 
-        # Конвертируем стоимость авто в рубли
+        # Конвертируем стоимость авто в рубли (прямая конверсия)
         price_krw = int(car_price) * 10000
-        price_usd = price_krw / usd_to_krw_rate
-        price_rub = price_usd * usd_to_rub_rate
+        price_usd = price_krw / usd_to_krw_rate  # Оставляем для расчета доставки в USD
+        price_rub = price_krw * krw_to_rub_rate  # Прямая конверсия KRW → RUB
 
         response = get_customs_fees(
             car_engine_displacement,
@@ -1926,7 +1931,7 @@ def calculate_cost(link, message):
         # Расчет стоимости услуги дилера/аукциона
         dealer_fee_krw = 440000  # в вонах
         dealer_fee_usd = dealer_fee_krw / usd_to_krw_rate  # конвертация в доллары
-        dealer_fee_rub = dealer_fee_usd * usd_to_rub_rate  # конвертация в рубли
+        dealer_fee_rub = dealer_fee_krw * krw_to_rub_rate  # Прямая конверсия KRW → RUB
 
         # Расчет стоимости оформления и перевозки по Корее
         kr_documentation_fee_krw = 300000  # в вонах
@@ -1934,8 +1939,8 @@ def calculate_cost(link, message):
             kr_documentation_fee_krw / usd_to_krw_rate
         )  # конвертация в доллары
         kr_documentation_fee_rub = (
-            kr_documentation_fee_usd * usd_to_rub_rate
-        )  # конвертация в рубли
+            kr_documentation_fee_krw * krw_to_rub_rate
+        )  # Прямая конверсия KRW → RUB
 
         # Расчет финальной стоимости автомобиля во Владивостоке
         total_cost_vladivostok = (
@@ -2556,7 +2561,7 @@ def process_engine_volume(message):
 
 
 def process_car_price(message):
-    global usd_to_krw_rate, usd_to_rub_rate
+    global usd_to_krw_rate, usd_to_rub_rate, krw_to_rub_rate, rub_to_krw_rate
 
     user_input = message.text.strip()
 
@@ -2589,9 +2594,13 @@ def process_car_price(message):
     engine_volume = user_data[message.chat.id]["engine_volume"]
     car_price_krw = user_data[message.chat.id]["car_price_krw"]
 
+    # Получаем актуальные курсы валют
+    get_currency_rates()
+    get_rub_to_krw_rate()
+
     # Конвертируем стоимость автомобиля в USD и RUB
-    price_usd = car_price_krw / usd_to_krw_rate
-    price_rub = price_usd * usd_to_rub_rate
+    price_usd = car_price_krw / usd_to_krw_rate  # Оставляем для расчета доставки в USD
+    price_rub = car_price_krw * krw_to_rub_rate  # Прямая конверсия KRW → RUB
 
     # Рассчитываем таможенные платежи
     customs_fees = get_customs_fees_manual(engine_volume, car_price_krw, age_group)
@@ -2613,7 +2622,7 @@ def process_car_price(message):
     # Расчет стоимости услуги дилера/аукциона
     dealer_fee_krw = 440000  # в вонах
     dealer_fee_usd = dealer_fee_krw / usd_to_krw_rate  # конвертация в доллары
-    dealer_fee_rub = dealer_fee_usd * usd_to_rub_rate  # конвертация в рубли
+    dealer_fee_rub = dealer_fee_krw * krw_to_rub_rate  # Прямая конверсия KRW → RUB
 
     # Расчет стоимости оформления и перевозки по Корее
     kr_documentation_fee_krw = 300000  # в вонах
@@ -2621,8 +2630,8 @@ def process_car_price(message):
         kr_documentation_fee_krw / usd_to_krw_rate
     )  # конвертация в доллары
     kr_documentation_fee_rub = (
-        kr_documentation_fee_usd * usd_to_rub_rate
-    )  # конвертация в рубли
+        kr_documentation_fee_krw * krw_to_rub_rate
+    )  # Прямая конверсия KRW → RUB
 
     # Расчет финальной стоимости автомобиля во Владивостоке
     total_cost_vladivostok = (

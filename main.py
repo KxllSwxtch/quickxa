@@ -1189,10 +1189,59 @@ def check_subscription(call):
     update_user_subscription(user_id, True)
 
 
+@bot.callback_query_handler(func=lambda call: call.data == "check_subscription_calc")
+def check_subscription_for_calculation(call):
+    user_id = call.from_user.id
+    
+    if is_user_subscribed(user_id):
+        bot.answer_callback_query(
+            call.id, "✅ Подписка подтверждена! Теперь вы можете рассчитать стоимость автомобиля."
+        )
+        bot.send_message(
+            call.message.chat.id,
+            "Выберите способ расчета стоимости:",
+            reply_markup=calculation_menu()
+        )
+        # Сохраняем статус подписки в БД
+        update_user_subscription(user_id, True)
+    else:
+        bot.answer_callback_query(
+            call.id, 
+            "❌ Вы еще не подписались на канал. Пожалуйста, подпишитесь и попробуйте снова.", 
+            show_alert=True
+        )
+
+
 def is_user_subscribed(user_id):
     """Проверяет, подписан ли пользователь на канал."""
-    # Всегда возвращаем True, считая пользователя подписанным
-    return True
+    try:
+        member = bot.get_chat_member(f"@{CHANNEL_USERNAME}", user_id)
+        return member.status in ['member', 'administrator', 'creator']
+    except:
+        return False
+
+
+def show_subscription_prompt(chat_id):
+    """Показывает сообщение с требованием подписаться на канал."""
+    keyboard = types.InlineKeyboardMarkup()
+    subscribe_button = types.InlineKeyboardButton(
+        text="📢 Подписаться на канал",
+        url=f"https://t.me/{CHANNEL_USERNAME}"
+    )
+    check_button = types.InlineKeyboardButton(
+        text="✅ Проверить подписку",
+        callback_data="check_subscription_calc"
+    )
+    keyboard.add(subscribe_button)
+    keyboard.add(check_button)
+    
+    bot.send_message(
+        chat_id,
+        "⚠️ Для использования функции расчета стоимости автомобиля необходимо подписаться на наш канал:\n\n"
+        f"👉 @{CHANNEL_USERNAME}\n\n"
+        "После подписки нажмите кнопку «Проверить подписку»",
+        reply_markup=keyboard
+    )
 
 
 def print_message(message):
@@ -2709,11 +2758,15 @@ def handle_message(message):
         return
 
     elif user_message == "Расчёт стоимости авто":
-        bot.send_message(
-            message.chat.id,
-            "Выберите способ расчета стоимости:",
-            reply_markup=calculation_menu(),
-        )
+        user_id = message.from_user.id
+        if is_user_subscribed(user_id):
+            bot.send_message(
+                message.chat.id,
+                "Выберите способ расчета стоимости:",
+                reply_markup=calculation_menu(),
+            )
+        else:
+            show_subscription_prompt(message.chat.id)
 
     elif user_message == "Заказать автомобиль / Оставить заявку":
         # Запускаем процесс заполнения заявки
@@ -2721,25 +2774,33 @@ def handle_message(message):
 
     # Подменю расчета
     elif user_message == "Рассчитать по ссылке":
-        bot.send_message(
-            message.chat.id,
-            "Пожалуйста, введите ссылку на автомобиль с одного из сайтов (encar.com, kbchachacha.com):",
-        )
+        user_id = message.from_user.id
+        if is_user_subscribed(user_id):
+            bot.send_message(
+                message.chat.id,
+                "Пожалуйста, введите ссылку на автомобиль с одного из сайтов (encar.com, kbchachacha.com):",
+            )
+        else:
+            show_subscription_prompt(message.chat.id)
 
     elif user_message == "Расчёт вручную":
-        # Запрашиваем возраст автомобиля
-        keyboard = types.ReplyKeyboardMarkup(
-            resize_keyboard=True, one_time_keyboard=True
-        )
-        keyboard.add("До 3 лет", "От 3 до 5 лет")
-        keyboard.add("От 5 до 7 лет", "Более 7 лет")
+        user_id = message.from_user.id
+        if is_user_subscribed(user_id):
+            # Запрашиваем возраст автомобиля
+            keyboard = types.ReplyKeyboardMarkup(
+                resize_keyboard=True, one_time_keyboard=True
+            )
+            keyboard.add("До 3 лет", "От 3 до 5 лет")
+            keyboard.add("От 5 до 7 лет", "Более 7 лет")
 
-        bot.send_message(
-            message.chat.id,
-            "Выберите возраст автомобиля:",
-            reply_markup=keyboard,
-        )
-        bot.register_next_step_handler(message, process_car_age)
+            bot.send_message(
+                message.chat.id,
+                "Выберите возраст автомобиля:",
+                reply_markup=keyboard,
+            )
+            bot.register_next_step_handler(message, process_car_age)
+        else:
+            show_subscription_prompt(message.chat.id)
 
     elif user_message == "Вернуться в главное меню":
         bot.send_message(
@@ -2753,7 +2814,11 @@ def handle_message(message):
         r"^https?://(www|fem)\.encar\.com/.*|^https?://(www\.)?kbchachacha\.com/.*|^https?://m\.kbchachacha\.com/.*",
         user_message,
     ):
-        calculate_cost(user_message, message)
+        user_id = message.from_user.id
+        if is_user_subscribed(user_id):
+            calculate_cost(user_message, message)
+        else:
+            show_subscription_prompt(message.chat.id)
 
     # В случае неизвестной команды
     else:

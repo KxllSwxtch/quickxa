@@ -36,6 +36,9 @@ from utils import (
     clean_number,
     get_customs_fees,
     calculate_age,
+    calculate_age_for_customs,
+    is_prokhodnaya_car,
+    will_be_prokhodnaya_soon,
     format_number,
     get_customs_fees_manual,
 )
@@ -1890,7 +1893,14 @@ def calculate_cost(link, message):
         formatted_car_year = f"20{car_year}"
         engine_volume_formatted = f"{format_number(car_engine_displacement)} cc"
 
+        # Расчет возраста с учетом будущего статуса "Проходная"
         age = calculate_age(int(formatted_car_year), car_month)
+        customs_age, is_future_prokhodnaya, months_to_prokhodnaya = calculate_age_for_customs(
+            int(formatted_car_year), car_month
+        )
+        
+        # Проверяем текущий статус проходной/непроходной
+        is_prokhodnaya = is_prokhodnaya_car(int(formatted_car_year), car_month)
 
         age_formatted = (
             "до 3 лет"
@@ -1915,6 +1925,7 @@ def calculate_cost(link, message):
             int(formatted_car_year),
             car_month,
             engine_type=1,
+            custom_age=customs_age,  # Используем возраст с учетом будущего статуса "Проходная"
         )
 
         customs_fee = clean_number(response.get("sbor", 0))  # таможенные сборы
@@ -1996,13 +2007,25 @@ def calculate_cost(link, message):
         # Расчет общих расходов в России
         russia_total_expenses = customs_duty + customs_fee + recycling_fee + broker_fee
         
+        # Формируем сообщение о статусе "Проходная"
+        prokhodnaya_status = ""
+        if is_prokhodnaya:
+            prokhodnaya_status = "✅ Проходная (3-5 лет)"
+        elif is_future_prokhodnaya:
+            months_word = "месяц" if months_to_prokhodnaya == 1 else ("месяца" if months_to_prokhodnaya < 5 else "месяцев")
+            prokhodnaya_status = f"⏳ Станет Проходной через {months_to_prokhodnaya} {months_word}\n📌 Расчет выполнен по ставке 3-5 лет"
+        else:
+            prokhodnaya_status = "❌ Непроходная"
+        
         if message.from_user.id in MANAGERS:
             # Упрощенное сообщение для менеджеров по новому формату
             result_message = (
                 f"📊 Расчёт автомобиля: {car_title}\n"
                 f"◾️ Дата регистрации: {month}/{formatted_car_year}\n"
                 f"🛣 Пробег: {formatted_mileage}\n"
-                f"⚙️ Объём двигателя: {engine_volume_formatted}\n\n"
+                f"⚙️ Объём двигателя: {engine_volume_formatted}\n"
+                f"📅 Возраст: {age_formatted}\n"
+                f"🚗 Статус: {prokhodnaya_status}\n\n"
                 f"🇰🇷 Расходы по Корее и логистика:\n"
                 f"• В вонах: ₩{format_number(korea_total_krw)}\n"
                 f"• В рублях: {format_number(korea_total_rub)} ₽\n\n"
@@ -2017,7 +2040,9 @@ def calculate_cost(link, message):
                 f"📊 Расчёт автомобиля: {car_title}\n"
                 f"◾️ Дата регистрации: {month}/{formatted_car_year}\n"
                 f"🛣 Пробег: {formatted_mileage}\n"
-                f"⚙️ Объём двигателя: {engine_volume_formatted}\n\n"
+                f"⚙️ Объём двигателя: {engine_volume_formatted}\n"
+                f"📅 Возраст: {age_formatted}\n"
+                f"🚗 Статус: {prokhodnaya_status}\n\n"
                 f"🇰🇷 Расходы по Корее и логистика:\n"
                 f"• В вонах: ₩{format_number(korea_total_krw)}\n"
                 f"• В рублях: {format_number(korea_total_rub)} ₽\n\n"

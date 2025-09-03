@@ -18,6 +18,66 @@ def format_number(number):
     return locale.format_string("%d", int(number), grouping=True)
 
 
+def is_prokhodnaya_car(year, month):
+    """
+    Определяет, является ли автомобиль "Проходным" или "Непроходным".
+    Проходные - автомобили возрастом от 3 до 5 лет на момент таможенного оформления.
+    Непроходные - автомобили младше 3 лет или старше 5 лет.
+
+    :param year: Год регистрации автомобиля
+    :param month: Месяц регистрации автомобиля
+    :return: True если автомобиль "Проходной", False если "Непроходной"
+    """
+    # Убираем ведущий ноль у месяца, если он есть
+    month = int(month.lstrip("0")) if isinstance(month, str) else int(month)
+    year = int(year)
+
+    # Рассчитываем возраст автомобиля в месяцах
+    current_date = datetime.datetime.now()
+    car_date = datetime.datetime(year=year, month=month, day=1)
+
+    age_in_months = (
+        (current_date.year - car_date.year) * 12 + current_date.month - car_date.month
+    )
+
+    # Проходные: от 36 месяцев (3 года) до 60 месяцев (5 лет)
+    if 36 <= age_in_months <= 60:
+        return True
+    else:
+        return False
+
+
+def will_be_prokhodnaya_soon(year, month, months_ahead=3):
+    """
+    Проверяет, станет ли автомобиль "Проходным" в ближайшие месяцы.
+    
+    :param year: Год регистрации автомобиля
+    :param month: Месяц регистрации автомобиля
+    :param months_ahead: Количество месяцев вперед для проверки (по умолчанию 3)
+    :return: Tuple (станет_ли_проходным, через_сколько_месяцев)
+    """
+    month = int(month.lstrip("0")) if isinstance(month, str) else int(month)
+    year = int(year)
+    
+    current_date = datetime.datetime.now()
+    car_date = datetime.datetime(year=year, month=month, day=1)
+    
+    age_in_months = (
+        (current_date.year - car_date.year) * 12 + current_date.month - car_date.month
+    )
+    
+    # Если авто уже проходное или старше 5 лет
+    if age_in_months >= 36:
+        return False, 0
+    
+    # Проверяем, станет ли проходным в ближайшие месяцы
+    months_to_prokhodnaya = 36 - age_in_months
+    if 0 < months_to_prokhodnaya <= months_ahead:
+        return True, months_to_prokhodnaya
+    
+    return False, 0
+
+
 def calculate_age(year, month):
     """
     Рассчитывает возрастную категорию автомобиля по классификации calcus.ru.
@@ -44,6 +104,25 @@ def calculate_age(year, month):
         return "5-7"
     else:
         return "7-0"
+
+
+def calculate_age_for_customs(year, month):
+    """
+    Рассчитывает возрастную категорию для таможни с учетом будущего статуса "Проходная".
+    Если авто станет проходным в ближайшие 3 месяца, возвращает категорию 3-5 лет.
+    
+    :param year: Год выпуска автомобиля
+    :param month: Месяц выпуска автомобиля
+    :return: Tuple (возрастная_категория, is_future_prokhodnaya, months_to_prokhodnaya)
+    """
+    current_age = calculate_age(year, month)
+    will_be_prokhodnaya, months_to = will_be_prokhodnaya_soon(year, month)
+    
+    if will_be_prokhodnaya and current_age == "0-3":
+        # Если скоро станет проходной, используем ставку 3-5 лет
+        return "3-5", True, months_to
+    
+    return current_age, False, 0
 
 
 def get_customs_fees_manual(engine_volume, car_price, car_age, engine_type=1):
@@ -86,20 +165,28 @@ def get_customs_fees_manual(engine_volume, car_price, car_age, engine_type=1):
         time.sleep(3)
 
 
-def get_customs_fees(engine_volume, car_price, car_year, car_month, engine_type=1):
+def get_customs_fees(engine_volume, car_price, car_year, car_month, engine_type=1, custom_age=None):
     """
     Запрашивает расчёт таможенных платежей с сайта calcus.ru.
     :param engine_volume: Объём двигателя (куб. см)
     :param car_price: Цена авто в вонах
     :param car_year: Год выпуска авто
+    :param car_month: Месяц выпуска авто
     :param engine_type: Тип двигателя (1 - бензин, 2 - дизель, 3 - гибрид, 4 - электромобиль)
+    :param custom_age: Возрастная категория для таможни (если None, рассчитывается автоматически)
     :return: JSON с результатами расчёта
     """
     url = "https://calcus.ru/calculate/Customs"
 
+    # Используем переданную возрастную категорию или рассчитываем
+    if custom_age:
+        age_category = custom_age
+    else:
+        age_category, _, _ = calculate_age_for_customs(car_year, car_month)
+
     payload = {
         "owner": 1,  # Физлицо
-        "age": calculate_age(car_year, car_month),  # Возрастная категория
+        "age": age_category,  # Возрастная категория
         "engine": engine_type,  # Тип двигателя (по умолчанию 1 - бензин)
         "power": 1,  # Лошадиные силы (можно оставить 1)
         "power_unit": 1,  # Тип мощности (1 - л.с.)

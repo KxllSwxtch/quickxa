@@ -1933,7 +1933,7 @@ def calculate_cost(link, message):
         recycling_fee = clean_number(response.get("util", 0))  # утилизационный сбор
 
         # Расчет стоимости брокерских услуг
-        broker_fee = 85000.00  # Брокерские услуги (СВХ + СБКТС + лаборатория + перегон)
+        broker_fee = 100000.00  # Брокерские услуги (СВХ + СБКТС + лаборатория + перегон)
 
         # Расчет стоимости доставки
         delivery_fee = 850.00 if car_type == "SUV" else 750.00  # в долларах
@@ -2626,7 +2626,7 @@ def process_car_price(message):
     recycling_fee = clean_number(customs_fees["util"])  # Утилизационный сбор
 
     # Расчет стоимости брокерских услуг
-    broker_fee = 85000.00  # Брокерские услуги (СВХ + СБКТС + лаборатория + перегон)
+    broker_fee = 100000.00  # Брокерские услуги (СВХ + СБКТС + лаборатория + перегон)
 
     # Определяем тип авто (SUV или седан) на основе объема двигателя
     car_type = "SUV" if engine_volume >= 2500 else "Sedan"

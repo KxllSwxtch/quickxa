@@ -125,13 +125,14 @@ def calculate_age_for_customs(year, month):
     return current_age, False, 0
 
 
-def get_customs_fees_manual(engine_volume, car_price, car_age, engine_type=1):
+def get_customs_fees_manual(engine_volume, car_price, car_age, engine_type=1, hp=1):
     """
     Запрашивает расчёт таможенных платежей с сайта calcus.ru.
     :param engine_volume: Объём двигателя (куб. см)
     :param car_price: Цена авто в вонах
-    :param car_year: Год выпуска авто
+    :param car_age: Возрастная категория авто
     :param engine_type: Тип двигателя (1 - бензин, 2 - дизель, 3 - гибрид, 4 - электромобиль)
+    :param hp: Мощность двигателя в л.с. (по умолчанию 1)
     :return: JSON с результатами расчёта
     """
     url = "https://calcus.ru/calculate/Customs"
@@ -140,11 +141,12 @@ def get_customs_fees_manual(engine_volume, car_price, car_age, engine_type=1):
         "owner": 1,  # Физлицо
         "age": car_age,  # Возрастная категория
         "engine": engine_type,  # Тип двигателя (по умолчанию 1 - бензин)
-        "power": 1,  # Лошадиные силы (можно оставить 1)
+        "power": hp,  # Лошадиные силы
         "power_unit": 1,  # Тип мощности (1 - л.с.)
         "value": int(engine_volume),  # Объём двигателя
         "price": int(car_price),  # Цена авто в KRW
         "curr": "KRW",  # Валюта
+        "year": str(datetime.datetime.now().year),  # Текущий год для расчёта утилизационного сбора
     }
 
     headers = {
@@ -165,7 +167,7 @@ def get_customs_fees_manual(engine_volume, car_price, car_age, engine_type=1):
         time.sleep(3)
 
 
-def get_customs_fees(engine_volume, car_price, car_year, car_month, engine_type=1, custom_age=None):
+def get_customs_fees(engine_volume, car_price, car_year, car_month, engine_type=1, custom_age=None, hp=1):
     """
     Запрашивает расчёт таможенных платежей с сайта calcus.ru.
     :param engine_volume: Объём двигателя (куб. см)
@@ -174,6 +176,7 @@ def get_customs_fees(engine_volume, car_price, car_year, car_month, engine_type=
     :param car_month: Месяц выпуска авто
     :param engine_type: Тип двигателя (1 - бензин, 2 - дизель, 3 - гибрид, 4 - электромобиль)
     :param custom_age: Возрастная категория для таможни (если None, рассчитывается автоматически)
+    :param hp: Мощность двигателя в л.с. (по умолчанию 1)
     :return: JSON с результатами расчёта
     """
     url = "https://calcus.ru/calculate/Customs"
@@ -188,11 +191,12 @@ def get_customs_fees(engine_volume, car_price, car_year, car_month, engine_type=
         "owner": 1,  # Физлицо
         "age": age_category,  # Возрастная категория
         "engine": engine_type,  # Тип двигателя (по умолчанию 1 - бензин)
-        "power": 1,  # Лошадиные силы (можно оставить 1)
+        "power": hp,  # Лошадиные силы
         "power_unit": 1,  # Тип мощности (1 - л.с.)
         "value": int(engine_volume),  # Объём двигателя
         "price": int(car_price),  # Цена авто в KRW
         "curr": "KRW",  # Валюта
+        "year": str(datetime.datetime.now().year),  # Текущий год для расчёта утилизационного сбора
     }
 
     headers = {
@@ -234,3 +238,50 @@ def generate_encar_photo_url(photo_path):
     photo_url = f"{base_url}/{photo_path}"
 
     return photo_url
+
+
+def get_pan_auto_car_data(car_id: str) -> dict | None:
+    """
+    Fetch car data from zefir.pan-auto.ru API.
+    Returns dict with hp, clearanceCost, utilizationFee, customsDuty if found and has HP.
+    Returns None if car not found, no HP value, or error.
+
+    :param car_id: Encar car ID
+    :return: Dict with customs data or None
+    """
+    url = f"https://zefir.pan-auto.ru/api/cars/{car_id}/"
+
+    headers = {
+        'Accept': '*/*',
+        'Accept-Language': 'en,ru;q=0.9',
+        'Connection': 'keep-alive',
+        'Origin': 'https://pan-auto.ru',
+        'Referer': 'https://pan-auto.ru/',
+        'User-Agent': random.choice(USER_AGENTS),
+        'Sec-Fetch-Dest': 'empty',
+        'Sec-Fetch-Mode': 'cors',
+        'Sec-Fetch-Site': 'same-site',
+        'sec-ch-ua': '"Google Chrome";v="143", "Chromium";v="143", "Not A(Brand";v="24"',
+        'sec-ch-ua-mobile': '?0',
+        'sec-ch-ua-platform': '"macOS"',
+    }
+
+    try:
+        response = requests.get(url, headers=headers, timeout=10)
+        if response.status_code == 200:
+            data = response.json()
+            hp = data.get('hp')
+            costs = data.get('costs', {}).get('RUB', {})
+
+            if hp and hp > 0:
+                return {
+                    'hp': hp,
+                    'clearanceCost': costs.get('clearanceCost', 0),
+                    'utilizationFee': costs.get('utilizationFee', 0),
+                    'customsDuty': costs.get('customsDuty', 0),
+                    'found': True
+                }
+        return None
+    except Exception as e:
+        print(f"Pan-Auto API error: {e}")
+        return None

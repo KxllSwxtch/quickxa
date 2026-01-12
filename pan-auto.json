@@ -1,0 +1,1119 @@
+{
+  "id": "41312805",
+  "manufacturer": {
+    "id": 58,
+    "name": "Volkswagen",
+    "action": "(And.Hidden.N._.(C.CarType.N._.Manufacturer.폭스바겐.))",
+    "translation": "Volkswagen",
+    "value": "폭스바겐",
+    "query": "volkswagen"
+  },
+  "model": {
+    "id": 792,
+    "name": "Golf",
+    "action": "(And.Hidden.N._.(C.CarType.N._.(C.Manufacturer.폭스바겐._.ModelGroup.골프.)))",
+    "translation": "Golf",
+    "value": "골프",
+    "query": "golf"
+  },
+  "mileage": 85770,
+  "costs": {
+    "RUB": {
+      "carPriceEncar": 14500000.0,
+      "carPrice": 864124.0,
+      "clearanceCost": 4269.0,
+      "utilizationFee": 5200.0,
+      "customsDuty": 869918.0,
+      "deliveryRate": 1850.0,
+      "deliveryCost": 155400.0,
+      "vladivostokServices": 110000.0,
+      "totalFees": 879387.0,
+      "finalCost": 2008911.0,
+      "pizdec": 5200.0,
+      "pizdecTotal": 2008911.0,
+      "dealerCost": 0.0
+    },
+    "USD": {
+      "carPriceEncar": 14500000.0,
+      "carPrice": 10298.0,
+      "clearanceCost": 4269.0,
+      "utilizationFee": 5200.0,
+      "customsDuty": 869918.0,
+      "deliveryRate": 1850.0,
+      "deliveryCost": 1850.0,
+      "vladivostokServices": 110000.0,
+      "totalFees": 879387.0,
+      "finalCost": 2009819.0,
+      "pizdec": 5200.0,
+      "pizdecTotal": 2009819.0,
+      "dealerCost": 0.0
+    },
+    "exchangeRatesManual": {
+      "russiaUsdBuyRate": 84.0,
+      "russiaEuroBuyRate": 115.0,
+      "russiaCnyBuyRate": 15.05,
+      "koreaUsdBuyRate": 1470.0,
+      "koreaEuroRate": 1460.0,
+      "koreaRubRate": 16.78,
+      "koreaUsdRate": 1408.0,
+      "koreaCnyRate": 190.0,
+      "deliveryRate": 1850.0,
+      "deliveryRateUnderFifty": 2850.0,
+      "deliveryRateOverFifty": 2850.0,
+      "deliveryRateHybridAndElectro": 2850.0,
+      "vladivostok": 110000.0,
+      "isMaintenance": false
+    },
+    "exchangeRatesCbr": {
+      "date": "31.12.2025",
+      "EUR": 92.0938,
+      "USD": 78.2267,
+      "KRW": 54.5552
+    }
+  },
+  "badge": "2.0 TDI Premium",
+  "badgeDetail": "",
+  "displacement": 1968,
+  "year": "Март, 2015 год",
+  "fuelType": "Дизель",
+  "carAge": 5,
+  "sellType": "일반",
+  "inCheap": null,
+  "modifiedDate": "2026-01-12T06:00:37.533983+03:00",
+  "vehicleNo": "51거2464",
+  "photos": [
+    "https://ci.encar.com/carpicture01/pic4131/41312805_017.jpg?impolicy=heightRate&rh=931&cw=1552&ch=931&cg=Center&wtmk=https://ci.encar.com/wt_mark/w_mark_04.png",
+    "https://ci.encar.com/carpicture01/pic4131/41312805_004.jpg?impolicy=heightRate&rh=931&cw=1552&ch=931&cg=Center&wtmk=https://ci.encar.com/wt_mark/w_mark_04.png",
+    "https://ci.encar.com/carpicture01/pic4131/41312805_016.jpg?impolicy=heightRate&rh=931&cw=1552&ch=931&cg=Center&wtmk=https://ci.encar.com/wt_mark/w_mark_04.png",
+    "https://ci.encar.com/carpicture01/pic4131/41312805_021.jpg?impolicy=heightRate&rh=931&cw=1552&ch=931&cg=Center&wtmk=https://ci.encar.com/wt_mark/w_mark_04.png",
+    "https://ci.encar.com/carpicture01/pic4131/41312805_015.jpg?impolicy=heightRate&rh=931&cw=1552&ch=931&cg=Center&wtmk=https://ci.encar.com/wt_mark/w_mark_04.png",
+    "https://ci.encar.com/carpicture01/pic4131/41312805_024.jpg?impolicy=heightRate&rh=931&cw=1552&ch=931&cg=Center&wtmk=https://ci.encar.com/wt_mark/w_mark_04.png",
+    "https://ci.encar.com/carpicture01/pic4131/41312805_022.jpg?impolicy=heightRate&rh=931&cw=1552&ch=931&cg=Center&wtmk=https://ci.encar.com/wt_mark/w_mark_04.png",
+    "https://ci.encar.com/carpicture01/pic4131/41312805_006.jpg?impolicy=heightRate&rh=931&cw=1552&ch=931&cg=Center&wtmk=https://ci.encar.com/wt_mark/w_mark_04.png",
+    "https://ci.encar.com/carpicture01/pic4131/41312805_019.jpg?impolicy=heightRate&rh=931&cw=1552&ch=931&cg=Center&wtmk=https://ci.encar.com/wt_mark/w_mark_04.png",
+    "https://ci.encar.com/carpicture01/pic4131/41312805_003.jpg?impolicy=heightRate&rh=931&cw=1552&ch=931&cg=Center&wtmk=https://ci.encar.com/wt_mark/w_mark_04.png",
+    "https://ci.encar.com/carpicture01/pic4131/41312805_009.jpg?impolicy=heightRate&rh=931&cw=1552&ch=931&cg=Center&wtmk=https://ci.encar.com/wt_mark/w_mark_04.png",
+    "https://ci.encar.com/carpicture01/pic4131/41312805_005.jpg?impolicy=heightRate&rh=931&cw=1552&ch=931&cg=Center&wtmk=https://ci.encar.com/wt_mark/w_mark_04.png",
+    "https://ci.encar.com/carpicture01/pic4131/41312805_007.jpg?impolicy=heightRate&rh=931&cw=1552&ch=931&cg=Center&wtmk=https://ci.encar.com/wt_mark/w_mark_04.png",
+    "https://ci.encar.com/carpicture01/pic4131/41312805_010.jpg?impolicy=heightRate&rh=931&cw=1552&ch=931&cg=Center&wtmk=https://ci.encar.com/wt_mark/w_mark_04.png",
+    "https://ci.encar.com/carpicture01/pic4131/41312805_023.jpg?impolicy=heightRate&rh=931&cw=1552&ch=931&cg=Center&wtmk=https://ci.encar.com/wt_mark/w_mark_04.png",
+    "https://ci.encar.com/carpicture01/pic4131/41312805_002.jpg?impolicy=heightRate&rh=931&cw=1552&ch=931&cg=Center&wtmk=https://ci.encar.com/wt_mark/w_mark_04.png",
+    "https://ci.encar.com/carpicture01/pic4131/41312805_001.jpg?impolicy=heightRate&rh=931&cw=1552&ch=931&cg=Center&wtmk=https://ci.encar.com/wt_mark/w_mark_04.png",
+    "https://ci.encar.com/carpicture01/pic4131/41312805_018.jpg?impolicy=heightRate&rh=931&cw=1552&ch=931&cg=Center&wtmk=https://ci.encar.com/wt_mark/w_mark_04.png",
+    "https://ci.encar.com/carpicture01/pic4131/41312805_020.jpg?impolicy=heightRate&rh=931&cw=1552&ch=931&cg=Center&wtmk=https://ci.encar.com/wt_mark/w_mark_04.png",
+    "https://ci.encar.com/carpicture01/pic4131/41312805_008.jpg?impolicy=heightRate&rh=931&cw=1552&ch=931&cg=Center&wtmk=https://ci.encar.com/wt_mark/w_mark_04.png"
+  ],
+  "inCostUp": null,
+  "accidentCnt": 7,
+  "accidents": [
+    {
+      "date": "2022-10-29",
+      "type": "2",
+      "partCost": 0,
+      "laborCost": 133,
+      "paintingCost": 228,
+      "insuranceBenefit": 532
+    },
+    {
+      "date": "2021-11-15",
+      "type": "2",
+      "partCost": 1276,
+      "laborCost": 246,
+      "paintingCost": 377,
+      "insuranceBenefit": 2552
+    },
+    {
+      "date": "2020-11-04",
+      "type": "2",
+      "partCost": 0,
+      "laborCost": 186,
+      "paintingCost": 113,
+      "insuranceBenefit": 340
+    },
+    {
+      "date": "2016-10-31",
+      "type": "3",
+      "partCost": 0,
+      "laborCost": 56,
+      "paintingCost": 148,
+      "insuranceBenefit": 265
+    },
+    {
+      "date": "2016-02-10",
+      "type": "1",
+      "partCost": 299,
+      "laborCost": 113,
+      "paintingCost": 357,
+      "insuranceBenefit": 130
+    },
+    {
+      "date": "2016-02-10",
+      "type": "3",
+      "partCost": 22,
+      "laborCost": 99,
+      "paintingCost": 322,
+      "insuranceBenefit": 107
+    },
+    {
+      "date": "2015-05-04",
+      "type": "3",
+      "partCost": 37,
+      "laborCost": 96,
+      "paintingCost": 247,
+      "insuranceBenefit": 1629
+    }
+  ],
+  "color": "белый",
+  "optionsCar": [
+    "001",
+    "004",
+    "005",
+    "006",
+    "007",
+    "008",
+    "010",
+    "014",
+    "015",
+    "017",
+    "019",
+    "020",
+    "022",
+    "023",
+    "024",
+    "026",
+    "027",
+    "029",
+    "031",
+    "032",
+    "033",
+    "055",
+    "056",
+    "057",
+    "058",
+    "071",
+    "072",
+    "085",
+    "094",
+    "096",
+    "097"
+  ],
+  "vin": "WVWZZZAUZFW231805",
+  "outers": [
+    {
+      "type": {
+        "code": "P021",
+        "title": "프론트 휀더(좌)"
+      },
+      "attributes": ["RANK_ONE"],
+      "statusTypes": [
+        {
+          "code": "X",
+          "title": "교환(교체)"
+        }
+      ]
+    }
+  ],
+  "outersEnka": [
+    {
+      "code": "006003",
+      "name": "FRONT_DOOR_LEFT",
+      "result": "정상",
+      "resultCode": "NORMAL"
+    },
+    {
+      "code": "006006",
+      "name": "BACK_DOOR_LEFT",
+      "result": "정상",
+      "resultCode": "NORMAL"
+    },
+    {
+      "code": "006009",
+      "name": "TRUNK_LID",
+      "result": "정상",
+      "resultCode": "NORMAL"
+    },
+    {
+      "code": "006018",
+      "name": "BACK_DOOR_RIGHT",
+      "result": "정상",
+      "resultCode": "NORMAL"
+    },
+    {
+      "code": "006023",
+      "name": "FRONT_DOOR_RIGHT",
+      "result": "정상",
+      "resultCode": "NORMAL"
+    },
+    {
+      "code": "006026",
+      "name": "HOOD",
+      "result": "정상",
+      "resultCode": "NORMAL"
+    },
+    {
+      "code": "006027",
+      "name": "FRONT_FENDER_RIGHT",
+      "result": "정상",
+      "resultCode": "NORMAL"
+    },
+    {
+      "code": "006033",
+      "name": "FRONT_FENDER_LEFT",
+      "result": "교환",
+      "resultCode": "REPLACEMENT"
+    },
+    {
+      "code": "006039",
+      "name": "CHECKER_COMMENT",
+      "result": "본 차량은 엔카의 진단 결과 외부패널부의  프론트휀더(좌)가 교환되었으며, 프레임(주요 골격) 부위는 모든 항목이 정상으로 확인되어, '외부패널 단순교환 차량'으로 진단 판정 합니다.",
+      "resultCode": null
+    },
+    {
+      "code": "006040",
+      "name": "OUTER_PANEL_COMMENT",
+      "result": "외부패널 확인 결과  프론트휀더(좌)가 교환되었음을 확인 하였습니다. 교환된 외부패널 부위를 둘러쌓은 프레임에 대한 상세 진단 결과, 관련된 프레임 교환이 없음을 확인하였습니다.\n비금속(FRP 플라스틱)의 탈부착 가능 부품은 점검사항에서 제외되며 중고차 특성 상 부분적인 판금,도색 및 차량의 노후화에 따른 자연스러운 부식이 있을 수 있습니다. 기능상 영향없는 감각적 손해(소음/진동/냄새/외관/작동감각 등) 보증제외.",
+      "resultCode": null
+    }
+  ],
+  "modelGroupEnglishName": "Golf",
+  "accidentCntAll": 10,
+  "myAccidentCost": 3333,
+  "otherAccidentCost": 1032,
+  "otherAccidentCnt": 3,
+  "accidentCostAll": 4365,
+  "lowCosts": null,
+  "highCosts": null,
+  "inspectionPhotos": [
+    "https://ci.encar.com/carsdata/cars/inspection/41312805_photoFront.jpg?impolicy=heightRate&rh=931&cw=1552&ch=931&cg=Center&wtmk=https://ci.encar.com/wt_mark/w_mark_04.png",
+    "https://ci.encar.com/carsdata/cars/inspection/41312805_photoBack.jpg?impolicy=heightRate&rh=931&cw=1552&ch=931&cg=Center&wtmk=https://ci.encar.com/wt_mark/w_mark_04.png"
+  ],
+  "sumAccidentCost": 4366,
+  "generation": {
+    "id": 1124,
+    "name": "골프 7세대",
+    "action": "(And.Hidden.N._.(C.CarType.N._.(C.Manufacturer.폭스바겐._.(C.ModelGroup.골프._.Model.골프 7세대.))))",
+    "translation": "7-е поколение",
+    "value": "골프 7세대",
+    "model_start_date": "2013-01-01",
+    "model_end_date": "2019-12-01",
+    "query": "golpeu-7sedae"
+  },
+  "version": "2.0 TDI Premium",
+  "AWD": false,
+  "gradeDetailEnglishName": "",
+  "similar": [
+    {
+      "id": "41283074",
+      "mileage": 185639,
+      "photos": [
+        "https://ci.encar.com/carpicture08/pic4128/41283074_001.jpg?impolicy=heightRate&rh=292&cw=390&ch=292&cg=Center&wtmk=https://ci.encar.com/wt_mark/w_mark_04.png",
+        "https://ci.encar.com/carpicture08/pic4128/41283074_003.jpg?impolicy=heightRate&rh=292&cw=390&ch=292&cg=Center&wtmk=https://ci.encar.com/wt_mark/w_mark_04.png",
+        "https://ci.encar.com/carpicture08/pic4128/41283074_004.jpg?impolicy=heightRate&rh=292&cw=390&ch=292&cg=Center&wtmk=https://ci.encar.com/wt_mark/w_mark_04.png",
+        "https://ci.encar.com/carpicture08/pic4128/41283074_007.jpg?impolicy=heightRate&rh=292&cw=390&ch=292&cg=Center&wtmk=https://ci.encar.com/wt_mark/w_mark_04.png"
+      ],
+      "model": {
+        "id": 792,
+        "name": "Golf",
+        "action": "(And.Hidden.N._.(C.CarType.N._.(C.Manufacturer.폭스바겐._.ModelGroup.골프.)))",
+        "translation": "Golf",
+        "value": "골프",
+        "query": "golf"
+      },
+      "manufacturer": {
+        "id": 58,
+        "name": "Volkswagen",
+        "action": "(And.Hidden.N._.(C.CarType.N._.Manufacturer.폭스바겐.))",
+        "translation": "Volkswagen",
+        "value": "폭스바겐",
+        "query": "volkswagen"
+      },
+      "carAge": 5,
+      "costs": {
+        "RUB": {
+          "carPriceEncar": 11500000.0,
+          "carPrice": 685340.0,
+          "clearanceCost": 4269.0,
+          "utilizationFee": 5200.0,
+          "customsDuty": 869918.0,
+          "deliveryRate": 1850.0,
+          "deliveryCost": 155400.0,
+          "vladivostokServices": 110000.0,
+          "totalFees": 879387.0,
+          "finalCost": 1830127.0,
+          "pizdec": 5200.0,
+          "pizdecTotal": 1830127.0,
+          "dealerCost": 0.0
+        },
+        "USD": {
+          "carPriceEncar": 11500000.0,
+          "carPrice": 8168.0,
+          "clearanceCost": 4269.0,
+          "utilizationFee": 5200.0,
+          "customsDuty": 869918.0,
+          "deliveryRate": 1850.0,
+          "deliveryCost": 1850.0,
+          "vladivostokServices": 110000.0,
+          "totalFees": 879387.0,
+          "finalCost": 1830899.0,
+          "pizdec": 5200.0,
+          "pizdecTotal": 1830899.0,
+          "dealerCost": 0.0
+        },
+        "exchangeRatesManual": {
+          "russiaUsdBuyRate": 84.0,
+          "russiaEuroBuyRate": 115.0,
+          "russiaCnyBuyRate": 15.05,
+          "koreaUsdBuyRate": 1470.0,
+          "koreaEuroRate": 1460.0,
+          "koreaRubRate": 16.78,
+          "koreaUsdRate": 1408.0,
+          "koreaCnyRate": 190.0,
+          "deliveryRate": 1850.0,
+          "deliveryRateUnderFifty": 2850.0,
+          "deliveryRateOverFifty": 2850.0,
+          "deliveryRateHybridAndElectro": 2850.0,
+          "vladivostok": 110000.0,
+          "isMaintenance": false
+        },
+        "exchangeRatesCbr": {
+          "date": "31.12.2025",
+          "EUR": 92.0938,
+          "USD": 78.2267,
+          "KRW": 54.5552
+        }
+      },
+      "badge": "2.0 TDI Premium",
+      "badgeDetail": "",
+      "gradeDetailEnglishName": "",
+      "generation": {
+        "id": 1124,
+        "name": "골프 7세대",
+        "action": "(And.Hidden.N._.(C.CarType.N._.(C.Manufacturer.폭스바겐._.(C.ModelGroup.골프._.Model.골프 7세대.))))",
+        "translation": "7-е поколение",
+        "value": "골프 7세대",
+        "model_start_date": "2013-01-01",
+        "model_end_date": "2019-12-01",
+        "query": "golpeu-7sedae"
+      },
+      "inCheap": null,
+      "sellType": "일반",
+      "inCostUp": null,
+      "own_photos": null
+    },
+    {
+      "id": "41259828",
+      "mileage": 116078,
+      "photos": [
+        "https://ci.encar.com/carpicture05/pic4125/41259828_001.jpg?impolicy=heightRate&rh=292&cw=390&ch=292&cg=Center&wtmk=https://ci.encar.com/wt_mark/w_mark_04.png",
+        "https://ci.encar.com/carpicture05/pic4125/41259828_003.jpg?impolicy=heightRate&rh=292&cw=390&ch=292&cg=Center&wtmk=https://ci.encar.com/wt_mark/w_mark_04.png",
+        "https://ci.encar.com/carpicture05/pic4125/41259828_004.jpg?impolicy=heightRate&rh=292&cw=390&ch=292&cg=Center&wtmk=https://ci.encar.com/wt_mark/w_mark_04.png",
+        "https://ci.encar.com/carpicture05/pic4125/41259828_007.jpg?impolicy=heightRate&rh=292&cw=390&ch=292&cg=Center&wtmk=https://ci.encar.com/wt_mark/w_mark_04.png"
+      ],
+      "model": {
+        "id": 792,
+        "name": "Golf",
+        "action": "(And.Hidden.N._.(C.CarType.N._.(C.Manufacturer.폭스바겐._.ModelGroup.골프.)))",
+        "translation": "Golf",
+        "value": "골프",
+        "query": "golf"
+      },
+      "manufacturer": {
+        "id": 58,
+        "name": "Volkswagen",
+        "action": "(And.Hidden.N._.(C.CarType.N._.Manufacturer.폭스바겐.))",
+        "translation": "Volkswagen",
+        "value": "폭스바겐",
+        "query": "volkswagen"
+      },
+      "carAge": 5,
+      "costs": {
+        "RUB": {
+          "carPriceEncar": 13400000.0,
+          "carPrice": 798570.0,
+          "clearanceCost": 4269.0,
+          "utilizationFee": 5200.0,
+          "customsDuty": 869918.0,
+          "deliveryRate": 1850.0,
+          "deliveryCost": 155400.0,
+          "vladivostokServices": 110000.0,
+          "totalFees": 879387.0,
+          "finalCost": 1943357.0,
+          "pizdec": 5200.0,
+          "pizdecTotal": 1943357.0,
+          "dealerCost": 0.0
+        },
+        "USD": {
+          "carPriceEncar": 13400000.0,
+          "carPrice": 9517.0,
+          "clearanceCost": 4269.0,
+          "utilizationFee": 5200.0,
+          "customsDuty": 869918.0,
+          "deliveryRate": 1850.0,
+          "deliveryCost": 1850.0,
+          "vladivostokServices": 110000.0,
+          "totalFees": 879387.0,
+          "finalCost": 1944215.0,
+          "pizdec": 5200.0,
+          "pizdecTotal": 1944215.0,
+          "dealerCost": 0.0
+        },
+        "exchangeRatesManual": {
+          "russiaUsdBuyRate": 84.0,
+          "russiaEuroBuyRate": 115.0,
+          "russiaCnyBuyRate": 15.05,
+          "koreaUsdBuyRate": 1470.0,
+          "koreaEuroRate": 1460.0,
+          "koreaRubRate": 16.78,
+          "koreaUsdRate": 1408.0,
+          "koreaCnyRate": 190.0,
+          "deliveryRate": 1850.0,
+          "deliveryRateUnderFifty": 2850.0,
+          "deliveryRateOverFifty": 2850.0,
+          "deliveryRateHybridAndElectro": 2850.0,
+          "vladivostok": 110000.0,
+          "isMaintenance": false
+        },
+        "exchangeRatesCbr": {
+          "date": "31.12.2025",
+          "EUR": 92.0938,
+          "USD": 78.2267,
+          "KRW": 54.5552
+        }
+      },
+      "badge": "2.0 TDI Premium",
+      "badgeDetail": "",
+      "gradeDetailEnglishName": "",
+      "generation": {
+        "id": 1124,
+        "name": "골프 7세대",
+        "action": "(And.Hidden.N._.(C.CarType.N._.(C.Manufacturer.폭스바겐._.(C.ModelGroup.골프._.Model.골프 7세대.))))",
+        "translation": "7-е поколение",
+        "value": "골프 7세대",
+        "model_start_date": "2013-01-01",
+        "model_end_date": "2019-12-01",
+        "query": "golpeu-7sedae"
+      },
+      "inCheap": null,
+      "sellType": "일반",
+      "inCostUp": null,
+      "own_photos": null
+    },
+    {
+      "id": "40728983",
+      "mileage": 45840,
+      "photos": [
+        "https://ci.encar.com/carpicture02/pic4072/40728983_001.jpg?impolicy=heightRate&rh=292&cw=390&ch=292&cg=Center&wtmk=https://ci.encar.com/wt_mark/w_mark_04.png",
+        "https://ci.encar.com/carpicture02/pic4072/40728983_003.jpg?impolicy=heightRate&rh=292&cw=390&ch=292&cg=Center&wtmk=https://ci.encar.com/wt_mark/w_mark_04.png",
+        "https://ci.encar.com/carpicture02/pic4072/40728983_004.jpg?impolicy=heightRate&rh=292&cw=390&ch=292&cg=Center&wtmk=https://ci.encar.com/wt_mark/w_mark_04.png",
+        "https://ci.encar.com/carpicture02/pic4072/40728983_007.jpg?impolicy=heightRate&rh=292&cw=390&ch=292&cg=Center&wtmk=https://ci.encar.com/wt_mark/w_mark_04.png"
+      ],
+      "model": {
+        "id": 806,
+        "name": "Tiguan",
+        "action": "(And.Hidden.N._.(C.CarType.N._.(C.Manufacturer.폭스바겐._.ModelGroup.티구안.)))",
+        "translation": "Tiguan",
+        "value": "티구안",
+        "query": "tiguan"
+      },
+      "manufacturer": {
+        "id": 58,
+        "name": "Volkswagen",
+        "action": "(And.Hidden.N._.(C.CarType.N._.Manufacturer.폭스바겐.))",
+        "translation": "Volkswagen",
+        "value": "폭스바겐",
+        "query": "volkswagen"
+      },
+      "carAge": 5,
+      "costs": {
+        "RUB": {
+          "carPriceEncar": 12200000.0,
+          "carPrice": 727056.0,
+          "clearanceCost": 4269.0,
+          "utilizationFee": 5200.0,
+          "customsDuty": 869918.0,
+          "deliveryRate": 1850.0,
+          "deliveryCost": 155400.0,
+          "vladivostokServices": 110000.0,
+          "totalFees": 879387.0,
+          "finalCost": 1871843.0,
+          "pizdec": 5200.0,
+          "pizdecTotal": 1871843.0,
+          "dealerCost": 0.0
+        },
+        "USD": {
+          "carPriceEncar": 12200000.0,
+          "carPrice": 8665.0,
+          "clearanceCost": 4269.0,
+          "utilizationFee": 5200.0,
+          "customsDuty": 869918.0,
+          "deliveryRate": 1850.0,
+          "deliveryCost": 1850.0,
+          "vladivostokServices": 110000.0,
+          "totalFees": 879387.0,
+          "finalCost": 1872647.0,
+          "pizdec": 5200.0,
+          "pizdecTotal": 1872647.0,
+          "dealerCost": 0.0
+        },
+        "exchangeRatesManual": {
+          "russiaUsdBuyRate": 84.0,
+          "russiaEuroBuyRate": 115.0,
+          "russiaCnyBuyRate": 15.05,
+          "koreaUsdBuyRate": 1470.0,
+          "koreaEuroRate": 1460.0,
+          "koreaRubRate": 16.78,
+          "koreaUsdRate": 1408.0,
+          "koreaCnyRate": 190.0,
+          "deliveryRate": 1850.0,
+          "deliveryRateUnderFifty": 2850.0,
+          "deliveryRateOverFifty": 2850.0,
+          "deliveryRateHybridAndElectro": 2850.0,
+          "vladivostok": 110000.0,
+          "isMaintenance": false
+        },
+        "exchangeRatesCbr": {
+          "date": "31.12.2025",
+          "EUR": 92.0938,
+          "USD": 78.2267,
+          "KRW": 54.5552
+        }
+      },
+      "badge": "2.0 TDI Premium",
+      "badgeDetail": "5N",
+      "gradeDetailEnglishName": "5N",
+      "generation": {
+        "id": 1152,
+        "name": "뉴 티구안",
+        "action": "(And.Hidden.N._.(C.CarType.N._.(C.Manufacturer.폭스바겐._.(C.ModelGroup.티구안._.Model.뉴 티구안.))))",
+        "translation": "Новый Tiguan",
+        "value": "뉴 티구안",
+        "model_start_date": "2011-09-01",
+        "model_end_date": "2016-12-01",
+        "query": "nyu-tiguan"
+      },
+      "inCheap": null,
+      "sellType": "일반",
+      "inCostUp": null,
+      "own_photos": [
+        "https://zefir.pan-auto.ru/photo/resize/?car_id=40728983&photo=photo_001.jpg",
+        "https://zefir.pan-auto.ru/photo/resize/?car_id=40728983&photo=photo_002.jpg",
+        "https://zefir.pan-auto.ru/photo/resize/?car_id=40728983&photo=photo_003.jpg",
+        "https://zefir.pan-auto.ru/photo/resize/?car_id=40728983&photo=photo_004.jpg"
+      ]
+    },
+    {
+      "id": "41251150",
+      "mileage": 35951,
+      "photos": [
+        "https://ci.encar.com/carpicture05/pic4125/41251150_001.jpg?impolicy=heightRate&rh=292&cw=390&ch=292&cg=Center&wtmk=https://ci.encar.com/wt_mark/w_mark_04.png",
+        "https://ci.encar.com/carpicture05/pic4125/41251150_003.jpg?impolicy=heightRate&rh=292&cw=390&ch=292&cg=Center&wtmk=https://ci.encar.com/wt_mark/w_mark_04.png",
+        "https://ci.encar.com/carpicture05/pic4125/41251150_004.jpg?impolicy=heightRate&rh=292&cw=390&ch=292&cg=Center&wtmk=https://ci.encar.com/wt_mark/w_mark_04.png",
+        "https://ci.encar.com/carpicture05/pic4125/41251150_007.jpg?impolicy=heightRate&rh=292&cw=390&ch=292&cg=Center&wtmk=https://ci.encar.com/wt_mark/w_mark_04.png"
+      ],
+      "model": {
+        "id": 806,
+        "name": "Tiguan",
+        "action": "(And.Hidden.N._.(C.CarType.N._.(C.Manufacturer.폭스바겐._.ModelGroup.티구안.)))",
+        "translation": "Tiguan",
+        "value": "티구안",
+        "query": "tiguan"
+      },
+      "manufacturer": {
+        "id": 58,
+        "name": "Volkswagen",
+        "action": "(And.Hidden.N._.(C.CarType.N._.Manufacturer.폭스바겐.))",
+        "translation": "Volkswagen",
+        "value": "폭스바겐",
+        "query": "volkswagen"
+      },
+      "carAge": 5,
+      "costs": {
+        "RUB": {
+          "carPriceEncar": 10800000.0,
+          "carPrice": 643623.0,
+          "clearanceCost": 4269.0,
+          "utilizationFee": 5200.0,
+          "customsDuty": 869918.0,
+          "deliveryRate": 1850.0,
+          "deliveryCost": 155400.0,
+          "vladivostokServices": 110000.0,
+          "totalFees": 879387.0,
+          "finalCost": 1788410.0,
+          "pizdec": 5200.0,
+          "pizdecTotal": 1788410.0,
+          "dealerCost": 0.0
+        },
+        "USD": {
+          "carPriceEncar": 10800000.0,
+          "carPrice": 7670.0,
+          "clearanceCost": 4269.0,
+          "utilizationFee": 5200.0,
+          "customsDuty": 869918.0,
+          "deliveryRate": 1850.0,
+          "deliveryCost": 1850.0,
+          "vladivostokServices": 110000.0,
+          "totalFees": 879387.0,
+          "finalCost": 1789067.0,
+          "pizdec": 5200.0,
+          "pizdecTotal": 1789067.0,
+          "dealerCost": 0.0
+        },
+        "exchangeRatesManual": {
+          "russiaUsdBuyRate": 84.0,
+          "russiaEuroBuyRate": 115.0,
+          "russiaCnyBuyRate": 15.05,
+          "koreaUsdBuyRate": 1470.0,
+          "koreaEuroRate": 1460.0,
+          "koreaRubRate": 16.78,
+          "koreaUsdRate": 1408.0,
+          "koreaCnyRate": 190.0,
+          "deliveryRate": 1850.0,
+          "deliveryRateUnderFifty": 2850.0,
+          "deliveryRateOverFifty": 2850.0,
+          "deliveryRateHybridAndElectro": 2850.0,
+          "vladivostok": 110000.0,
+          "isMaintenance": false
+        },
+        "exchangeRatesCbr": {
+          "date": "31.12.2025",
+          "EUR": 92.0938,
+          "USD": 78.2267,
+          "KRW": 54.5552
+        }
+      },
+      "badge": "2.0 TDI Comfort",
+      "badgeDetail": "5N",
+      "gradeDetailEnglishName": "5N",
+      "generation": {
+        "id": 1152,
+        "name": "뉴 티구안",
+        "action": "(And.Hidden.N._.(C.CarType.N._.(C.Manufacturer.폭스바겐._.(C.ModelGroup.티구안._.Model.뉴 티구안.))))",
+        "translation": "Новый Tiguan",
+        "value": "뉴 티구안",
+        "model_start_date": "2011-09-01",
+        "model_end_date": "2016-12-01",
+        "query": "nyu-tiguan"
+      },
+      "inCheap": null,
+      "sellType": "일반",
+      "inCostUp": null,
+      "own_photos": null
+    },
+    {
+      "id": "40698191",
+      "mileage": 160170,
+      "photos": [
+        "https://ci.encar.com/carpicture09/pic4069/40698191_001.jpg?impolicy=heightRate&rh=292&cw=390&ch=292&cg=Center&wtmk=https://ci.encar.com/wt_mark/w_mark_04.png",
+        "https://ci.encar.com/carpicture09/pic4069/40698191_003.jpg?impolicy=heightRate&rh=292&cw=390&ch=292&cg=Center&wtmk=https://ci.encar.com/wt_mark/w_mark_04.png",
+        "https://ci.encar.com/carpicture09/pic4069/40698191_004.jpg?impolicy=heightRate&rh=292&cw=390&ch=292&cg=Center&wtmk=https://ci.encar.com/wt_mark/w_mark_04.png",
+        "https://ci.encar.com/carpicture09/pic4069/40698191_007.jpg?impolicy=heightRate&rh=292&cw=390&ch=292&cg=Center&wtmk=https://ci.encar.com/wt_mark/w_mark_04.png"
+      ],
+      "model": {
+        "id": 806,
+        "name": "Tiguan",
+        "action": "(And.Hidden.N._.(C.CarType.N._.(C.Manufacturer.폭스바겐._.ModelGroup.티구안.)))",
+        "translation": "Tiguan",
+        "value": "티구안",
+        "query": "tiguan"
+      },
+      "manufacturer": {
+        "id": 58,
+        "name": "Volkswagen",
+        "action": "(And.Hidden.N._.(C.CarType.N._.Manufacturer.폭스바겐.))",
+        "translation": "Volkswagen",
+        "value": "폭스바겐",
+        "query": "volkswagen"
+      },
+      "carAge": 5,
+      "costs": {
+        "RUB": {
+          "carPriceEncar": 8800000.0,
+          "carPrice": 524434.0,
+          "clearanceCost": 4269.0,
+          "utilizationFee": 5200.0,
+          "customsDuty": 869918.0,
+          "deliveryRate": 1850.0,
+          "deliveryCost": 155400.0,
+          "vladivostokServices": 110000.0,
+          "totalFees": 879387.0,
+          "finalCost": 1669221.0,
+          "pizdec": 5200.0,
+          "pizdecTotal": 1669221.0,
+          "dealerCost": 0.0
+        },
+        "USD": {
+          "carPriceEncar": 8800000.0,
+          "carPrice": 6250.0,
+          "clearanceCost": 4269.0,
+          "utilizationFee": 5200.0,
+          "customsDuty": 869918.0,
+          "deliveryRate": 1850.0,
+          "deliveryCost": 1850.0,
+          "vladivostokServices": 110000.0,
+          "totalFees": 879387.0,
+          "finalCost": 1669787.0,
+          "pizdec": 5200.0,
+          "pizdecTotal": 1669787.0,
+          "dealerCost": 0.0
+        },
+        "exchangeRatesManual": {
+          "russiaUsdBuyRate": 84.0,
+          "russiaEuroBuyRate": 115.0,
+          "russiaCnyBuyRate": 15.05,
+          "koreaUsdBuyRate": 1470.0,
+          "koreaEuroRate": 1460.0,
+          "koreaRubRate": 16.78,
+          "koreaUsdRate": 1408.0,
+          "koreaCnyRate": 190.0,
+          "deliveryRate": 1850.0,
+          "deliveryRateUnderFifty": 2850.0,
+          "deliveryRateOverFifty": 2850.0,
+          "deliveryRateHybridAndElectro": 2850.0,
+          "vladivostok": 110000.0,
+          "isMaintenance": false
+        },
+        "exchangeRatesCbr": {
+          "date": "31.12.2025",
+          "EUR": 92.0938,
+          "USD": 78.2267,
+          "KRW": 54.5552
+        }
+      },
+      "badge": "2.0 TDI Premium",
+      "badgeDetail": "5N",
+      "gradeDetailEnglishName": "5N",
+      "generation": {
+        "id": 1152,
+        "name": "뉴 티구안",
+        "action": "(And.Hidden.N._.(C.CarType.N._.(C.Manufacturer.폭스바겐._.(C.ModelGroup.티구안._.Model.뉴 티구안.))))",
+        "translation": "Новый Tiguan",
+        "value": "뉴 티구안",
+        "model_start_date": "2011-09-01",
+        "model_end_date": "2016-12-01",
+        "query": "nyu-tiguan"
+      },
+      "inCheap": null,
+      "sellType": "일반",
+      "inCostUp": null,
+      "own_photos": [
+        "https://zefir.pan-auto.ru/photo/resize/?car_id=40698191&photo=photo_001.jpg",
+        "https://zefir.pan-auto.ru/photo/resize/?car_id=40698191&photo=photo_002.jpg",
+        "https://zefir.pan-auto.ru/photo/resize/?car_id=40698191&photo=photo_003.jpg",
+        "https://zefir.pan-auto.ru/photo/resize/?car_id=40698191&photo=photo_004.jpg"
+      ]
+    },
+    {
+      "id": "40355656",
+      "mileage": 90548,
+      "photos": [
+        "https://ci.encar.com/carpicture05/pic4035/40355656_001.jpg?impolicy=heightRate&rh=292&cw=390&ch=292&cg=Center&wtmk=https://ci.encar.com/wt_mark/w_mark_04.png",
+        "https://ci.encar.com/carpicture05/pic4035/40355656_003.jpg?impolicy=heightRate&rh=292&cw=390&ch=292&cg=Center&wtmk=https://ci.encar.com/wt_mark/w_mark_04.png",
+        "https://ci.encar.com/carpicture05/pic4035/40355656_004.jpg?impolicy=heightRate&rh=292&cw=390&ch=292&cg=Center&wtmk=https://ci.encar.com/wt_mark/w_mark_04.png",
+        "https://ci.encar.com/carpicture05/pic4035/40355656_007.jpg?impolicy=heightRate&rh=292&cw=390&ch=292&cg=Center&wtmk=https://ci.encar.com/wt_mark/w_mark_04.png"
+      ],
+      "model": {
+        "id": 792,
+        "name": "Golf",
+        "action": "(And.Hidden.N._.(C.CarType.N._.(C.Manufacturer.폭스바겐._.ModelGroup.골프.)))",
+        "translation": "Golf",
+        "value": "골프",
+        "query": "golf"
+      },
+      "manufacturer": {
+        "id": 58,
+        "name": "Volkswagen",
+        "action": "(And.Hidden.N._.(C.CarType.N._.Manufacturer.폭스바겐.))",
+        "translation": "Volkswagen",
+        "value": "폭스바겐",
+        "query": "volkswagen"
+      },
+      "carAge": 5,
+      "costs": {
+        "RUB": {
+          "carPriceEncar": 10200000.0,
+          "carPrice": 607867.0,
+          "clearanceCost": 4269.0,
+          "utilizationFee": 5200.0,
+          "customsDuty": 869918.0,
+          "deliveryRate": 1850.0,
+          "deliveryCost": 155400.0,
+          "vladivostokServices": 110000.0,
+          "totalFees": 879387.0,
+          "finalCost": 1752654.0,
+          "pizdec": 5200.0,
+          "pizdecTotal": 1752654.0,
+          "dealerCost": 0.0
+        },
+        "USD": {
+          "carPriceEncar": 10200000.0,
+          "carPrice": 7244.0,
+          "clearanceCost": 4269.0,
+          "utilizationFee": 5200.0,
+          "customsDuty": 869918.0,
+          "deliveryRate": 1850.0,
+          "deliveryCost": 1850.0,
+          "vladivostokServices": 110000.0,
+          "totalFees": 879387.0,
+          "finalCost": 1753283.0,
+          "pizdec": 5200.0,
+          "pizdecTotal": 1753283.0,
+          "dealerCost": 0.0
+        },
+        "exchangeRatesManual": {
+          "russiaUsdBuyRate": 84.0,
+          "russiaEuroBuyRate": 115.0,
+          "russiaCnyBuyRate": 15.05,
+          "koreaUsdBuyRate": 1470.0,
+          "koreaEuroRate": 1460.0,
+          "koreaRubRate": 16.78,
+          "koreaUsdRate": 1408.0,
+          "koreaCnyRate": 190.0,
+          "deliveryRate": 1850.0,
+          "deliveryRateUnderFifty": 2850.0,
+          "deliveryRateOverFifty": 2850.0,
+          "deliveryRateHybridAndElectro": 2850.0,
+          "vladivostok": 110000.0,
+          "isMaintenance": false
+        },
+        "exchangeRatesCbr": {
+          "date": "31.12.2025",
+          "EUR": 92.0938,
+          "USD": 78.2267,
+          "KRW": 54.5552
+        }
+      },
+      "badge": "2.0 TDI",
+      "badgeDetail": "",
+      "gradeDetailEnglishName": "",
+      "generation": {
+        "id": 1124,
+        "name": "골프 7세대",
+        "action": "(And.Hidden.N._.(C.CarType.N._.(C.Manufacturer.폭스바겐._.(C.ModelGroup.골프._.Model.골프 7세대.))))",
+        "translation": "7-е поколение",
+        "value": "골프 7세대",
+        "model_start_date": "2013-01-01",
+        "model_end_date": "2019-12-01",
+        "query": "golpeu-7sedae"
+      },
+      "inCheap": null,
+      "sellType": "일반",
+      "inCostUp": null,
+      "own_photos": [
+        "https://zefir.pan-auto.ru/photo/resize/?car_id=40355656&photo=photo_001.jpg",
+        "https://zefir.pan-auto.ru/photo/resize/?car_id=40355656&photo=photo_002.jpg",
+        "https://zefir.pan-auto.ru/photo/resize/?car_id=40355656&photo=photo_003.jpg",
+        "https://zefir.pan-auto.ru/photo/resize/?car_id=40355656&photo=photo_004.jpg"
+      ]
+    },
+    {
+      "id": "41250016",
+      "mileage": 92281,
+      "photos": [
+        "https://ci.encar.com/carpicture05/pic4125/41250016_001.jpg?impolicy=heightRate&rh=292&cw=390&ch=292&cg=Center&wtmk=https://ci.encar.com/wt_mark/w_mark_04.png",
+        "https://ci.encar.com/carpicture05/pic4125/41250016_003.jpg?impolicy=heightRate&rh=292&cw=390&ch=292&cg=Center&wtmk=https://ci.encar.com/wt_mark/w_mark_04.png",
+        "https://ci.encar.com/carpicture05/pic4125/41250016_004.jpg?impolicy=heightRate&rh=292&cw=390&ch=292&cg=Center&wtmk=https://ci.encar.com/wt_mark/w_mark_04.png",
+        "https://ci.encar.com/carpicture05/pic4125/41250016_007.jpg?impolicy=heightRate&rh=292&cw=390&ch=292&cg=Center&wtmk=https://ci.encar.com/wt_mark/w_mark_04.png"
+      ],
+      "model": {
+        "id": 806,
+        "name": "Tiguan",
+        "action": "(And.Hidden.N._.(C.CarType.N._.(C.Manufacturer.폭스바겐._.ModelGroup.티구안.)))",
+        "translation": "Tiguan",
+        "value": "티구안",
+        "query": "tiguan"
+      },
+      "manufacturer": {
+        "id": 58,
+        "name": "Volkswagen",
+        "action": "(And.Hidden.N._.(C.CarType.N._.Manufacturer.폭스바겐.))",
+        "translation": "Volkswagen",
+        "value": "폭스바겐",
+        "query": "volkswagen"
+      },
+      "carAge": 5,
+      "costs": {
+        "RUB": {
+          "carPriceEncar": 9500000.0,
+          "carPrice": 566150.0,
+          "clearanceCost": 4269.0,
+          "utilizationFee": 5200.0,
+          "customsDuty": 869918.0,
+          "deliveryRate": 1850.0,
+          "deliveryCost": 155400.0,
+          "vladivostokServices": 110000.0,
+          "totalFees": 879387.0,
+          "finalCost": 1710937.0,
+          "pizdec": 5200.0,
+          "pizdecTotal": 1710937.0,
+          "dealerCost": 0.0
+        },
+        "USD": {
+          "carPriceEncar": 9500000.0,
+          "carPrice": 6747.0,
+          "clearanceCost": 4269.0,
+          "utilizationFee": 5200.0,
+          "customsDuty": 869918.0,
+          "deliveryRate": 1850.0,
+          "deliveryCost": 1850.0,
+          "vladivostokServices": 110000.0,
+          "totalFees": 879387.0,
+          "finalCost": 1711535.0,
+          "pizdec": 5200.0,
+          "pizdecTotal": 1711535.0,
+          "dealerCost": 0.0
+        },
+        "exchangeRatesManual": {
+          "russiaUsdBuyRate": 84.0,
+          "russiaEuroBuyRate": 115.0,
+          "russiaCnyBuyRate": 15.05,
+          "koreaUsdBuyRate": 1470.0,
+          "koreaEuroRate": 1460.0,
+          "koreaRubRate": 16.78,
+          "koreaUsdRate": 1408.0,
+          "koreaCnyRate": 190.0,
+          "deliveryRate": 1850.0,
+          "deliveryRateUnderFifty": 2850.0,
+          "deliveryRateOverFifty": 2850.0,
+          "deliveryRateHybridAndElectro": 2850.0,
+          "vladivostok": 110000.0,
+          "isMaintenance": false
+        },
+        "exchangeRatesCbr": {
+          "date": "31.12.2025",
+          "EUR": 92.0938,
+          "USD": 78.2267,
+          "KRW": 54.5552
+        }
+      },
+      "badge": "2.0 TDI Premium",
+      "badgeDetail": "5N",
+      "gradeDetailEnglishName": "5N",
+      "generation": {
+        "id": 1152,
+        "name": "뉴 티구안",
+        "action": "(And.Hidden.N._.(C.CarType.N._.(C.Manufacturer.폭스바겐._.(C.ModelGroup.티구안._.Model.뉴 티구안.))))",
+        "translation": "Новый Tiguan",
+        "value": "뉴 티구안",
+        "model_start_date": "2011-09-01",
+        "model_end_date": "2016-12-01",
+        "query": "nyu-tiguan"
+      },
+      "inCheap": null,
+      "sellType": "일반",
+      "inCostUp": null,
+      "own_photos": null
+    },
+    {
+      "id": "41178668",
+      "mileage": 37002,
+      "photos": [
+        "https://ci.encar.com/carpicture07/pic4117/41178668_001.jpg?impolicy=heightRate&rh=292&cw=390&ch=292&cg=Center&wtmk=https://ci.encar.com/wt_mark/w_mark_04.png",
+        "https://ci.encar.com/carpicture07/pic4117/41178668_003.jpg?impolicy=heightRate&rh=292&cw=390&ch=292&cg=Center&wtmk=https://ci.encar.com/wt_mark/w_mark_04.png",
+        "https://ci.encar.com/carpicture07/pic4117/41178668_004.jpg?impolicy=heightRate&rh=292&cw=390&ch=292&cg=Center&wtmk=https://ci.encar.com/wt_mark/w_mark_04.png",
+        "https://ci.encar.com/carpicture07/pic4117/41178668_007.jpg?impolicy=heightRate&rh=292&cw=390&ch=292&cg=Center&wtmk=https://ci.encar.com/wt_mark/w_mark_04.png"
+      ],
+      "model": {
+        "id": 808,
+        "name": "Passat",
+        "action": "(And.Hidden.N._.(C.CarType.N._.(C.Manufacturer.폭스바겐._.ModelGroup.파사트.)))",
+        "translation": "Passat",
+        "value": "파사트",
+        "query": "passat"
+      },
+      "manufacturer": {
+        "id": 58,
+        "name": "Volkswagen",
+        "action": "(And.Hidden.N._.(C.CarType.N._.Manufacturer.폭스바겐.))",
+        "translation": "Volkswagen",
+        "value": "폭스바겐",
+        "query": "volkswagen"
+      },
+      "carAge": 5,
+      "costs": {
+        "RUB": {
+          "carPriceEncar": 9400000.0,
+          "carPrice": 560191.0,
+          "clearanceCost": 4269.0,
+          "utilizationFee": 5200.0,
+          "customsDuty": 869918.0,
+          "deliveryRate": 1850.0,
+          "deliveryCost": 155400.0,
+          "vladivostokServices": 110000.0,
+          "totalFees": 879387.0,
+          "finalCost": 1704978.0,
+          "pizdec": 5200.0,
+          "pizdecTotal": 1704978.0,
+          "dealerCost": 0.0
+        },
+        "USD": {
+          "carPriceEncar": 9400000.0,
+          "carPrice": 6676.0,
+          "clearanceCost": 4269.0,
+          "utilizationFee": 5200.0,
+          "customsDuty": 869918.0,
+          "deliveryRate": 1850.0,
+          "deliveryCost": 1850.0,
+          "vladivostokServices": 110000.0,
+          "totalFees": 879387.0,
+          "finalCost": 1705571.0,
+          "pizdec": 5200.0,
+          "pizdecTotal": 1705571.0,
+          "dealerCost": 0.0
+        },
+        "exchangeRatesManual": {
+          "russiaUsdBuyRate": 84.0,
+          "russiaEuroBuyRate": 115.0,
+          "russiaCnyBuyRate": 15.05,
+          "koreaUsdBuyRate": 1470.0,
+          "koreaEuroRate": 1460.0,
+          "koreaRubRate": 16.78,
+          "koreaUsdRate": 1408.0,
+          "koreaCnyRate": 190.0,
+          "deliveryRate": 1850.0,
+          "deliveryRateUnderFifty": 2850.0,
+          "deliveryRateOverFifty": 2850.0,
+          "deliveryRateHybridAndElectro": 2850.0,
+          "vladivostok": 110000.0,
+          "isMaintenance": false
+        },
+        "exchangeRatesCbr": {
+          "date": "31.12.2025",
+          "EUR": 92.0938,
+          "USD": 78.2267,
+          "KRW": 54.5552
+        }
+      },
+      "badge": "2.0 TDI",
+      "badgeDetail": "B7",
+      "gradeDetailEnglishName": "B7",
+      "generation": {
+        "id": 1156,
+        "name": "더 뉴 파사트",
+        "action": "(And.Hidden.N._.(C.CarType.N._.(C.Manufacturer.폭스바겐._.(C.ModelGroup.파사트._.Model.더 뉴 파사트.))))",
+        "translation": "Новый Passat",
+        "value": "더 뉴 파사트",
+        "model_start_date": "2011-01-01",
+        "model_end_date": null,
+        "query": "deo-nyu-pasateu"
+      },
+      "inCheap": null,
+      "sellType": "일반",
+      "inCostUp": null,
+      "own_photos": null
+    }
+  ],
+  "finalCost": 2008911.0,
+  "reserved": false,
+  "views": 2,
+  "formYear": "2015",
+  "dealer": false,
+  "engineModel": "CRB",
+  "own_photos": null,
+  "hp": 150,
+  "ckw": 110.29,
+  "bkw": null,
+  "isPanauto": false,
+  "reviewCover": "",
+  "isNewCar": false,
+  "sale": null
+}

@@ -2020,20 +2020,10 @@ def calculate_cost(link, message, hp_override=None, skip_increment=False):
         dealer_fee_usd = dealer_fee_krw / usd_to_krw_rate  # конвертация в доллары
         dealer_fee_rub = dealer_fee_krw * krw_to_rub_rate  # Прямая конверсия KRW → RUB
 
-        # Расчет стоимости оформления и перевозки по Корее
-        kr_documentation_fee_krw = 300000  # в вонах
-        kr_documentation_fee_usd = (
-            kr_documentation_fee_krw / usd_to_krw_rate
-        )  # конвертация в доллары
-        kr_documentation_fee_rub = (
-            kr_documentation_fee_krw * krw_to_rub_rate
-        )  # Прямая конверсия KRW → RUB
-
         # Расчет финальной стоимости автомобиля во Владивостоке
         total_cost_vladivostok = (
             price_rub  # стоимость авто
             + dealer_fee_rub  # услуги дилера/аукциона
-            + kr_documentation_fee_rub  # оформление, снятие с учёта и перевозка по Корее
             + customs_duty  # таможенная пошлина
             + customs_fee  # таможенные сборы
             + recycling_fee  # утилизационный сбор
@@ -2077,8 +2067,8 @@ def calculate_cost(link, message, hp_override=None, skip_increment=False):
 
         # Формирование сообщения результата
         # Расчет общих сумм для Кореи
-        korea_total_krw = price_krw + dealer_fee_krw + kr_documentation_fee_krw + (delivery_fee_usd * usd_to_krw_rate)
-        korea_total_rub = price_rub + dealer_fee_rub + kr_documentation_fee_rub + delivery_fee_rub
+        korea_total_krw = price_krw + dealer_fee_krw + (delivery_fee_usd * usd_to_krw_rate)
+        korea_total_rub = price_rub + dealer_fee_rub + delivery_fee_rub
         korea_total_usd = korea_total_krw / usd_to_krw_rate
 
         # Расчет общих расходов в России

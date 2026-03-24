@@ -2079,7 +2079,8 @@ def calculate_cost(link, message, hp_override=None, skip_increment=False):
         # Расчет общих сумм для Кореи
         korea_total_krw = price_krw + dealer_fee_krw + kr_documentation_fee_krw + (delivery_fee_usd * usd_to_krw_rate)
         korea_total_rub = price_rub + dealer_fee_rub + kr_documentation_fee_rub + delivery_fee_rub
-        
+        korea_total_usd = korea_total_krw / usd_to_krw_rate
+
         # Расчет общих расходов в России
         russia_total_expenses = customs_duty + customs_fee + recycling_fee + broker_fee
         
@@ -2093,43 +2094,43 @@ def calculate_cost(link, message, hp_override=None, skip_increment=False):
         else:
             prokhodnaya_status = "❌ Непроходная"
         
+        mileage_display = formatted_mileage.replace(' км', '').replace('км', '').replace('km', '').strip()
+
         if message.from_user.id in MANAGERS:
-            # Упрощенное сообщение для менеджеров по новому формату
             result_message = (
-                f"📊 Расчёт автомобиля: {car_title}\n"
-                f"◾️ Дата регистрации: {month}/{formatted_car_year}\n"
-                f"🛣 Пробег: {formatted_mileage}\n"
-                f"⚙️ Объём двигателя: {engine_volume_formatted}\n\n"
-                f"🇰🇷 Расходы по Корее и логистика:\n"
-                f"• В вонах: ₩{format_number(korea_total_krw)}\n"
-                f"• В рублях: {format_number(korea_total_rub)} ₽\n\n"
+                f"💳 {car_title}\n"
+                f"🗓 Регистрация: {month}/{formatted_car_year}\n"
+                f"🛣 Пробег: {mileage_display} км\n"
+                f"⚙️ Объём двигателя: {engine_volume_formatted}\n"
+                f"🛞 Мощность: {hp_value} л.с\n"
+                f"🌍 Расходы→Корея и логистика до Владивосток:\n"
+                f" ₩ : ₩{format_number(korea_total_krw)}\n"
+                f" $ : ${format_number(int(korea_total_usd))}\n"
+                f" ₽ : {format_number(korea_total_rub)} ₽\n"
                 f"🇷🇺 Расходы в России: {format_number(russia_total_expenses)} ₽\n"
                 f"   • Таможенная пошлина: {format_number(customs_duty)} ₽\n"
                 f"   • Таможенные сборы: {format_number(customs_fee)} ₽\n"
                 f"   • Утилизационный сбор: {format_number(recycling_fee)} ₽\n"
-                f"   • Брокерские услуги: {format_number(broker_fee)} ₽\n\n"
-                f"• Цена под ключ во Владивостоке: {format_number(total_cost_vladivostok)} ₽\n\n"
-                f"🚚 Для доставки до вашего города уточняйте у менеджера\n\n"
-                f"Ссылка на авто: {preview_link}\n\n"
+                f"   • Брокерские услуги: {format_number(broker_fee)} ₽\n"
+                f"{preview_link}"
             )
         else:
-            # Упрощённое сообщение для клиентов по новому формату
             result_message = (
-                f"📊 Расчёт автомобиля: {car_title}\n"
-                f"◾️ Дата регистрации: {month}/{formatted_car_year}\n"
-                f"🛣 Пробег: {formatted_mileage}\n"
-                f"⚙️ Объём двигателя: {engine_volume_formatted}\n\n"
-                f"🇰🇷 Расходы по Корее и логистика:\n"
-                f"• В вонах: ₩{format_number(korea_total_krw)}\n"
-                f"• В рублях: {format_number(korea_total_rub)} ₽\n\n"
+                f"💳 {car_title}\n"
+                f"🗓 Регистрация: {month}/{formatted_car_year}\n"
+                f"🛣 Пробег: {mileage_display} км\n"
+                f"⚙️ Объём двигателя: {engine_volume_formatted}\n"
+                f"🛞 Мощность: {hp_value} л.с\n"
+                f"🌍 Расходы→Корея и логистика до Владивосток:\n"
+                f" ₩ : ₩{format_number(korea_total_krw)}\n"
+                f" $ : ${format_number(int(korea_total_usd))}\n"
+                f" ₽ : {format_number(korea_total_rub)} ₽\n"
                 f"🇷🇺 Расходы в России: {format_number(russia_total_expenses)} ₽\n"
                 f"   • Таможенная пошлина: {format_number(customs_duty)} ₽\n"
                 f"   • Таможенные сборы: {format_number(customs_fee)} ₽\n"
                 f"   • Утилизационный сбор: {format_number(recycling_fee)} ₽\n"
-                f"   • Брокерские услуги: {format_number(broker_fee)} ₽\n\n"
-                f"• Цена под ключ во Владивостоке: {format_number(total_cost_vladivostok)} ₽\n\n"
-                f"🚚 Для доставки до вашего города уточняйте у менеджера\n\n"
-                f"Ссылка на авто: {preview_link}\n\n"
+                f"   • Брокерские услуги: {format_number(broker_fee)} ₽\n"
+                f"{preview_link}\n\n"
                 f"⚠️ Если данное авто попадает под санкции, уточните возможность отправки у наших менеджеров:\n\n"
                 f"📱 +82-10-7626-1999\n"
                 f"📱 +82-10-7934-6603\n"

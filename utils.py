@@ -1,8 +1,9 @@
-import time
-import requests
 import datetime
 import locale
 import random
+import time
+
+import requests
 
 PROXY_URL = "http://B01vby:GBno0x@45.118.250.2:8000"
 proxies = {"http": PROXY_URL, "https": PROXY_URL}
@@ -50,7 +51,7 @@ def is_prokhodnaya_car(year, month):
 def will_be_prokhodnaya_soon(year, month, months_ahead=3):
     """
     Проверяет, станет ли автомобиль "Проходным" в ближайшие месяцы.
-    
+
     :param year: Год регистрации автомобиля
     :param month: Месяц регистрации автомобиля
     :param months_ahead: Количество месяцев вперед для проверки (по умолчанию 3)
@@ -58,23 +59,23 @@ def will_be_prokhodnaya_soon(year, month, months_ahead=3):
     """
     month = int(month.lstrip("0")) if isinstance(month, str) else int(month)
     year = int(year)
-    
+
     current_date = datetime.datetime.now()
     car_date = datetime.datetime(year=year, month=month, day=1)
-    
+
     age_in_months = (
         (current_date.year - car_date.year) * 12 + current_date.month - car_date.month
     )
-    
+
     # Если авто уже проходное или старше 5 лет
     if age_in_months >= 36:
         return False, 0
-    
+
     # Проверяем, станет ли проходным в ближайшие месяцы
     months_to_prokhodnaya = 36 - age_in_months
     if 0 < months_to_prokhodnaya <= months_ahead:
         return True, months_to_prokhodnaya
-    
+
     return False, 0
 
 
@@ -110,18 +111,18 @@ def calculate_age_for_customs(year, month):
     """
     Рассчитывает возрастную категорию для таможни с учетом будущего статуса "Проходная".
     Если авто станет проходным в ближайшие 3 месяца, возвращает категорию 3-5 лет.
-    
+
     :param year: Год выпуска автомобиля
     :param month: Месяц выпуска автомобиля
     :return: Tuple (возрастная_категория, is_future_prokhodnaya, months_to_prokhodnaya)
     """
     current_age = calculate_age(year, month)
     will_be_prokhodnaya, months_to = will_be_prokhodnaya_soon(year, month)
-    
+
     if will_be_prokhodnaya and current_age == "0-3":
         # Если скоро станет проходной, используем ставку 3-5 лет
         return "3-5", True, months_to
-    
+
     return current_age, False, 0
 
 
@@ -146,7 +147,9 @@ def get_customs_fees_manual(engine_volume, car_price, car_age, engine_type=1, hp
         "value": int(engine_volume),  # Объём двигателя
         "price": int(car_price),  # Цена авто в KRW
         "curr": "KRW",  # Валюта
-        "year": str(datetime.datetime.now().year),  # Текущий год для расчёта утилизационного сбора
+        "year": str(
+            datetime.datetime.now().year
+        ),  # Текущий год для расчёта утилизационного сбора
     }
 
     headers = {
@@ -167,7 +170,9 @@ def get_customs_fees_manual(engine_volume, car_price, car_age, engine_type=1, hp
         time.sleep(3)
 
 
-def get_customs_fees(engine_volume, car_price, car_year, car_month, engine_type=1, custom_age=None, hp=1):
+def get_customs_fees(
+    engine_volume, car_price, car_year, car_month, engine_type=1, custom_age=None, hp=1
+):
     """
     Запрашивает расчёт таможенных платежей с сайта calcus.ru.
     :param engine_volume: Объём двигателя (куб. см)
@@ -196,7 +201,9 @@ def get_customs_fees(engine_volume, car_price, car_year, car_month, engine_type=
         "value": int(engine_volume),  # Объём двигателя
         "price": int(car_price),  # Цена авто в KRW
         "curr": "KRW",  # Валюта
-        "year": str(datetime.datetime.now().year),  # Текущий год для расчёта утилизационного сбора
+        "year": str(
+            datetime.datetime.now().year
+        ),  # Текущий год для расчёта утилизационного сбора
     }
 
     headers = {
@@ -249,37 +256,37 @@ def get_pan_auto_car_data(car_id: str) -> dict | None:
     :param car_id: Encar car ID
     :return: Dict with customs data or None
     """
-    url = f"https://zefir.pan-auto.ru/api/cars/{car_id}/"
+    url = f"https://zefir.pan-auto.ru/api/korea/{car_id}/"
 
     headers = {
-        'Accept': '*/*',
-        'Accept-Language': 'en,ru;q=0.9',
-        'Connection': 'keep-alive',
-        'Origin': 'https://pan-auto.ru',
-        'Referer': 'https://pan-auto.ru/',
-        'User-Agent': random.choice(USER_AGENTS),
-        'Sec-Fetch-Dest': 'empty',
-        'Sec-Fetch-Mode': 'cors',
-        'Sec-Fetch-Site': 'same-site',
-        'sec-ch-ua': '"Google Chrome";v="143", "Chromium";v="143", "Not A(Brand";v="24"',
-        'sec-ch-ua-mobile': '?0',
-        'sec-ch-ua-platform': '"macOS"',
+        "Accept": "*/*",
+        "Accept-Language": "en,ru;q=0.9",
+        "Connection": "keep-alive",
+        "Origin": "https://pan-auto.ru",
+        "Referer": "https://pan-auto.ru/",
+        "User-Agent": random.choice(USER_AGENTS),
+        "Sec-Fetch-Dest": "empty",
+        "Sec-Fetch-Mode": "cors",
+        "Sec-Fetch-Site": "same-site",
+        "sec-ch-ua": '"Google Chrome";v="143", "Chromium";v="143", "Not A(Brand";v="24"',
+        "sec-ch-ua-mobile": "?0",
+        "sec-ch-ua-platform": '"macOS"',
     }
 
     try:
         response = requests.get(url, headers=headers, timeout=10)
         if response.status_code == 200:
             data = response.json()
-            hp = data.get('hp')
-            costs = data.get('costs', {}).get('RUB', {})
+            hp = data.get("hp")
+            costs = data.get("costs", {}).get("RUB", {})
 
             if hp and hp > 0:
                 return {
-                    'hp': hp,
-                    'clearanceCost': costs.get('clearanceCost', 0),
-                    'utilizationFee': costs.get('utilizationFee', 0),
-                    'customsDuty': costs.get('customsDuty', 0),
-                    'found': True
+                    "hp": hp,
+                    "clearanceCost": costs.get("clearanceCost", 0),
+                    "utilizationFee": costs.get("utilizationFee", 0),
+                    "customsDuty": costs.get("customsDuty", 0),
+                    "found": True,
                 }
         return None
     except Exception as e:

@@ -78,7 +78,10 @@ def safe_call(fn, *args, attempts=5, **kwargs):
             )
             time.sleep(wait)
         except requests.exceptions.RequestException as e:
-            logging.warning("Network error on %s: %s; retry in 3s", fn.__name__, e)
+            # Redact the bot token: requests exception strings include the
+            # request URL, which contains the token (.../bot<TOKEN>/method).
+            msg = str(e).replace(bot_token, "***") if bot_token else str(e)
+            logging.warning("Network error on %s: %s; retry in 3s", fn.__name__, msg)
             time.sleep(3)
     logging.error("%s failed after %s attempts; continuing without it", fn.__name__, attempts)
     return None

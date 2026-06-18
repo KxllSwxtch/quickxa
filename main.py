@@ -48,6 +48,9 @@ from utils import (
 
 load_dotenv()
 logging.basicConfig(level=logging.INFO)
+# Keep the HTTP stack from logging request URLs (they embed the bot token).
+logging.getLogger("urllib3").setLevel(logging.WARNING)
+logging.getLogger("requests").setLevel(logging.WARNING)
 
 CALCULATE_CAR_TEXT = "Рассчитать Автомобиль (Encar, KBChaCha)"
 CHANNEL_USERNAME = "HYT_Trading"

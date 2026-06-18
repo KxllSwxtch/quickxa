@@ -1,7 +1,9 @@
 import json
 import telebot
+import telebot.apihelper
 import os
 import re
+import time
 import requests
 import locale
 import logging
@@ -44,14 +46,42 @@ from utils import (
     get_pan_auto_car_data,
 )
 
+load_dotenv()
+logging.basicConfig(level=logging.INFO)
+
 CALCULATE_CAR_TEXT = "Рассчитать Автомобиль (Encar, KBChaCha)"
 CHANNEL_USERNAME = "HYT_Trading"
 BOT_TOKEN = os.getenv("BOT_TOKEN")
 
-load_dotenv()
 bot_token = os.getenv("BOT_TOKEN")
 bot = telebot.TeleBot(bot_token)
-bot.set_webhook("")
+
+# Retry transient Telegram/network errors instead of crashing on startup.
+telebot.apihelper.RETRY_ON_ERROR = True
+telebot.apihelper.MAX_RETRIES = 5
+telebot.apihelper.RETRY_TIMEOUT = 3
+
+
+def safe_call(fn, *args, attempts=5, **kwargs):
+    """Call a Telegram API method, tolerating transient 429/5xx/network errors.
+
+    Honors Telegram's retry_after on 429 and never lets a momentary API hiccup
+    crash startup; logs and continues if all attempts fail.
+    """
+    for i in range(attempts):
+        try:
+            return fn(*args, **kwargs)
+        except telebot.apihelper.ApiTelegramException as e:
+            wait = e.result_json.get("parameters", {}).get("retry_after", 3 * (i + 1))
+            logging.warning(
+                "Telegram API error %s on %s; retry in %ss", e.error_code, fn.__name__, wait
+            )
+            time.sleep(wait)
+        except requests.exceptions.RequestException as e:
+            logging.warning("Network error on %s: %s; retry in 3s", fn.__name__, e)
+            time.sleep(3)
+    logging.error("%s failed after %s attempts; continuing without it", fn.__name__, attempts)
+    return None
 
 
 # Set locale for number formatting
@@ -3398,25 +3428,23 @@ if __name__ == "__main__":
     print("🚀 ===============================================")
     print("🚀 Quickxa Bot - Инициализация...")
     print("🚀 ===============================================")
-    set_bot_commands()
+    safe_call(set_bot_commands)
     print("✅ Команды бота успешно установлены")
 
     # Удаляем вебхук перед запуском бота
     print("🔄 Удаление вебхука...")
-    bot.delete_webhook()
+    safe_call(bot.delete_webhook)
     print("✅ Вебхук успешно удален")
 
-    # Обновляем курс каждые 12 часов и удаляем вебхук каждые 5 минут
+    # Обновляем курс каждые 12 часов
     print("⏱️ Настройка планировщика задач...")
     scheduler = BackgroundScheduler()
     scheduler.add_job(get_usd_to_krw_rate, "interval", hours=12)
     print("💱 Задача обновления курса USD→KRW добавлена (каждые 12 часов)")
-    scheduler.add_job(bot.delete_webhook, "interval", minutes=5)
-    print("🔄 Задача удаления вебхука добавлена (каждые 5 минут)")
     scheduler.start()
     print("✅ Планировщик задач успешно запущен")
 
     print("🤖 ===============================================")
     print("🤖 Бот запускается в режиме polling...")
     print("🤖 ===============================================")
-    bot.polling(non_stop=True)
+    bot.infinity_polling(timeout=20, long_polling_timeout=20, logger_level=logging.INFO)
